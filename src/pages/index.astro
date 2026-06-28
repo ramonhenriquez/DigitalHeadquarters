@@ -1,17 +1,298 @@
 ---
+/**
+ * src/pages/index.astro — Digital Headquarters Homepage
+ * ─────────────────────────────────────────────────────────────────
+ * Data + orchestration only. All rendering is handled by components.
+ *
+ * To update content: edit the arrays below. No HTML changes needed.
+ *
+ * Section order:
+ *   1. Hero          (Hero.astro — includes StatusPanel)
+ *   2. Infra Stats   (inline — 4 stat cards)
+ *   3. Projects      (ProjectCard.astro × 6)
+ *   4. Tech Stack    (TechStack.astro)
+ *   5. Journey       (LearningJourney.astro)
+ *   6. Contact CTA   (CTA.astro)
+ */
 
+import Layout          from '../components/Layout.astro';
+import Hero            from '../components/Hero.astro';
+import ProjectCard     from '../components/ProjectCard.astro';
+import TechStack       from '../components/TechStack.astro';
+import type { SkillGroup } from '../components/TechStack.astro';
+import LearningJourney from '../components/LearningJourney.astro';
+import type { Milestone }  from '../components/LearningJourney.astro';
+import CTA             from '../components/CTA.astro';
+import type { CTAAction }  from '../components/CTA.astro';
+
+
+// ─── FEATURED PROJECTS ────────────────────────────────────────────
+// Matches the 6 project pages listed in the site IA exactly.
+// statusColor: "green" = live/healthy | "blue" = monitoring/media
+// category:    shown as a small eyebrow above the card title
+
+const projects = [
+  {
+    title: 'Enterprise Homelab',
+    category: 'VIRTUALIZATION',
+    description:
+      '3-node Proxmox VE hypervisor cluster running KVM virtual machines and LXC containers on ZFS-backed storage. The foundation for every other service — live migration, scheduled snapshots, and resource pooling configured end-to-end.',
+    tags: ['Proxmox VE', 'KVM', 'LXC', 'ZFS'],
+    statusLabel: 'Production',
+    statusColor: 'green' as const,
+    href: '/projects/homelab',
+  },
+  {
+    title: 'Wazuh SIEM + Suricata IDS',
+    category: 'SECURITY',
+    description:
+      'Integrated security monitoring stack. Wazuh agents run on every endpoint with 150+ custom detection rules and file integrity monitoring. Suricata inspects all inter-VLAN traffic using Emerging Threats rulesets, forwarding alerts directly into the SIEM.',
+    tags: ['Wazuh', 'Suricata', 'Elasticsearch', 'pfSense'],
+    statusLabel: 'Active',
+    statusColor: 'green' as const,
+    href: '/projects/wazuh',
+  },
+  {
+    title: 'Active Directory Lab',
+    category: 'IDENTITY',
+    description:
+      'Windows Server 2022 domain with hardened GPO security baselines, an internal certificate authority, and LDAP/S integration across all self-hosted services. Built to practice enterprise identity management and access control at realistic scale.',
+    tags: ['Active Directory', 'Windows Server', 'GPO', 'PKI'],
+    statusLabel: 'Active',
+    statusColor: 'green' as const,
+    href: '/projects/active-directory',
+  },
+  {
+    title: 'BookStack Documentation',
+    category: 'DOCUMENTATION',
+    description:
+      'Self-hosted knowledge base capturing every homelab runbook, network diagram, and post-mortem. Authenticated against Active Directory over LDAP so the same domain credentials unlock the docs. All infrastructure is documented before it ships.',
+    tags: ['BookStack', 'Docker', 'MariaDB', 'LDAP'],
+    statusLabel: 'Online',
+    statusColor: 'green' as const,
+    href: '/projects/bookstack',
+  },
+  {
+    title: 'Jellyfin Media Server',
+    category: 'MEDIA',
+    description:
+      'Self-hosted media server deployed in a dedicated LXC container with GPU-accelerated transcoding via Proxmox passthrough. Streams personal content across the homelab network with persistent NFS storage mounts and zero third-party cloud dependency.',
+    tags: ['Jellyfin', 'LXC', 'GPU Passthrough', 'NFS'],
+    statusLabel: 'Online',
+    statusColor: 'blue' as const,
+    href: '/projects/jellyfin',
+  },
+  {
+    title: 'Odysseus AI Platform',
+    category: 'AI / ML',
+    description:
+      'On-premises LLM inference platform built on Ollama and Open WebUI. Runs multiple open-source language models with GPU passthrough from Proxmox. Fully air-gapped — no API keys, no cloud calls, no usage limits.',
+    tags: ['Ollama', 'Open WebUI', 'CUDA', 'Docker'],
+    statusLabel: 'Online',
+    statusColor: 'green' as const,
+    href: '/projects/odysseus-ai',
+  },
+];
+
+
+// ─── TECHNOLOGY STACK ─────────────────────────────────────────────
+const skillGroups: SkillGroup[] = [
+  {
+    category: 'Virtualization',
+    skills: ['Proxmox VE', 'KVM / QEMU', 'LXC Containers', 'VMware ESXi', 'ZFS Storage'],
+  },
+  {
+    category: 'Security & SIEM',
+    skills: ['Wazuh', 'Suricata IDS/IPS', 'Log Analysis', 'Threat Detection', 'Incident Response'],
+  },
+  {
+    category: 'Identity & Access',
+    skills: ['Active Directory', 'Group Policy', 'LDAP / LDAPS', 'PKI / CA', 'DNS & DHCP'],
+  },
+  {
+    category: 'Networking',
+    skills: ['pfSense', 'WireGuard VPN', 'VLAN Segmentation', 'Pi-hole', 'Tailscale'],
+  },
+  {
+    category: 'Systems & Automation',
+    skills: ['Linux Administration', 'Windows Server', 'Bash Scripting', 'PowerShell', 'Docker'],
+  },
+  {
+    category: 'Monitoring & Docs',
+    skills: ['Grafana', 'Uptime Kuma', 'Prometheus', 'BookStack', 'Jellyfin'],
+  },
+];
+
+
+// ─── LEARNING JOURNEY ─────────────────────────────────────────────
+// Timeline flows completed → in-progress → planned.
+// Add new entries here as milestones are reached.
+
+const milestones: Milestone[] = [
+  {
+    date: 'Q3 2023',
+    title: 'First Dedicated Homelab Node',
+    description:
+      'Repurposed enterprise hardware into the first dedicated lab server. Installed Proxmox VE and learned hypervisor fundamentals through hands-on experimentation rather than courses alone.',
+    tags: ['Proxmox VE', 'Hardware', 'Linux'],
+    status: 'completed',
+  },
+  {
+    date: 'Q4 2023',
+    title: 'Proxmox Cluster & ZFS Storage',
+    description:
+      'Expanded to a 3-node cluster with shared ZFS storage pools, live VM migration, and high-availability groups for critical services. First real experience with distributed systems.',
+    tags: ['Proxmox VE', 'ZFS', 'High Availability'],
+    status: 'completed',
+  },
+  {
+    date: 'Q1 2024',
+    title: 'Active Directory & Identity Management',
+    description:
+      'Built a Windows Server 2022 domain from scratch — Group Policy baselines, internal certificate authority, and LDAP integration across all self-hosted services. Centralized authentication for the entire lab.',
+    tags: ['Active Directory', 'Windows Server', 'GPO', 'PKI'],
+    status: 'completed',
+  },
+  {
+    date: 'Q2 2024',
+    title: 'Wazuh SIEM & Suricata IDS Deployment',
+    description:
+      'Deployed full-stack security monitoring: Wazuh agents on every endpoint with 150+ custom detection rules, and Suricata on the pfSense gateway for network-layer intrusion detection. First real exposure to SOC tooling.',
+    tags: ['Wazuh', 'Suricata', 'SIEM', 'IDS/IPS'],
+    status: 'completed',
+  },
+  {
+    date: 'Q3 2024',
+    title: 'Odysseus AI — On-Premises LLM Platform',
+    description:
+      'Built a fully air-gapped AI inference server using Ollama and Open WebUI with GPU passthrough from Proxmox. Runs multiple open-source LLMs without cloud dependency.',
+    tags: ['Ollama', 'Open WebUI', 'CUDA', 'GPU Passthrough'],
+    status: 'completed',
+  },
+  {
+    date: 'Now',
+    title: 'CompTIA Security+ Certification',
+    description:
+      'Formalizing hands-on security knowledge with Security+ study. Bridging homelab experience with industry-standard certification to validate skills for SOC analyst roles.',
+    tags: ['Security+', 'CompTIA', 'Certification'],
+    status: 'in-progress',
+  },
+  {
+    date: '2025',
+    title: 'SOC Analyst — Entry Level',
+    description:
+      'Target: a Tier 1 SOC analyst role applying SIEM, IDS, and incident response skills built in the homelab to real security operations. The lab exists to earn this seat.',
+    tags: ['SOC', 'Incident Response', 'Security Operations'],
+    status: 'planned',
+  },
+];
+
+
+// ─── CONTACT CTA ──────────────────────────────────────────────────
+const ctaActions: CTAAction[] = [
+  {
+    label: 'GitHub',
+    href: 'https://github.com/yourusername',
+    variant: 'primary',
+    external: true,
+  },
+  {
+    label: 'Resume',
+    href: '/resume',
+    variant: 'outline',
+  },
+  {
+    label: 'Email Me',
+    href: 'mailto:ramon@example.com',
+    variant: 'ghost',
+  },
+];
 ---
 
-<html lang="en">
-	<head>
-		<meta charset="utf-8" />
-		<link rel="icon" type="image/svg+xml" href="/favicon.svg" />
-		<link rel="icon" href="/favicon.ico" />
-		<meta name="viewport" content="width=device-width" />
-		<meta name="generator" content={Astro.generator} />
-		<title>Astro</title>
-	</head>
-	<body>
-		<h1>Astro</h1>
-	</body>
-</html>
+<Layout
+  title="Ramon Henriquez — Systems Engineer"
+  description="Systems Technician II and homelab engineer building enterprise-grade infrastructure and aspiring to work in security operations. Proxmox, Wazuh SIEM, Active Directory, and self-hosted AI — all running at home."
+>
+
+  <!-- ① HERO — name, roles, status panel, CTAs -->
+  <Hero />
+
+
+  <!-- ② INFRASTRUCTURE AT A GLANCE -->
+  <section class="section infra-stats" aria-labelledby="stats-heading">
+    <div class="container">
+
+      <div class="section-header">
+        <span class="section-eyebrow">BY THE NUMBERS</span>
+        <h2 class="section-title" id="stats-heading">Infrastructure at a Glance</h2>
+      </div>
+
+      <div class="stats-grid">
+        <div class="stat-card">
+          <span class="stat-card__value">12<span class="stat-card__sup">+</span></span>
+          <span class="stat-card__label">VMs &amp; Containers</span>
+          <span class="stat-card__desc">Running across a 3-node Proxmox cluster</span>
+        </div>
+
+        <div class="stat-card">
+          <span class="stat-card__value">6</span>
+          <span class="stat-card__label">Core Services</span>
+          <span class="stat-card__desc">SIEM, IDS, identity, AI, media, and docs</span>
+        </div>
+
+        <div class="stat-card">
+          <span class="stat-card__value">99.7<span class="stat-card__sup">%</span></span>
+          <span class="stat-card__label">Uptime</span>
+          <span class="stat-card__desc">30-day rolling average across all services</span>
+        </div>
+
+        <div class="stat-card">
+          <span class="stat-card__value">150<span class="stat-card__sup">+</span></span>
+          <span class="stat-card__label">SIEM Rules</span>
+          <span class="stat-card__desc">Custom detection rules deployed in Wazuh</span>
+        </div>
+      </div>
+
+    </div>
+  </section>
+
+
+  <!-- ③ FEATURED PROJECTS -->
+  <section id="projects" class="section" aria-labelledby="projects-heading">
+    <div class="container">
+
+      <div class="section-header">
+        <span class="section-eyebrow">INFRASTRUCTURE PORTFOLIO</span>
+        <h2 class="section-title" id="projects-heading">Featured Projects</h2>
+        <p class="section-desc">
+          Production systems designed, deployed, and documented in my homelab —
+          each one built to solve a real operational problem.
+        </p>
+      </div>
+
+      <div class="projects-grid">
+        {projects.map(project => (
+          <ProjectCard {...project} />
+        ))}
+      </div>
+
+    </div>
+  </section>
+
+
+  <!-- ④ TECHNOLOGY STACK -->
+  <TechStack groups={skillGroups} />
+
+
+  <!-- ⑤ LEARNING JOURNEY -->
+  <LearningJourney milestones={milestones} />
+
+
+  <!-- ⑥ CONTACT CTA -->
+  <CTA
+    title="Let's work together"
+    description="Open to SOC analyst, IT operations, and infrastructure engineering roles. I bring practical lab experience, thorough documentation habits, and a security-first approach to every system I touch."
+    actions={ctaActions}
+  />
+
+</Layout>

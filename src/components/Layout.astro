@@ -1,0 +1,75 @@
+---
+/**
+ * Layout.astro
+ * ─────────────────────────────────────────────────────────────────
+ * The HTML shell that wraps every page on the site.
+ * Handles <head> meta, global CSS, Navbar, Footer, and the <slot />
+ * where page content is injected.
+ *
+ * Usage:
+ *   <Layout title="Page Title" description="...">
+ *     <!-- page content here -->
+ *   </Layout>
+ */
+
+import Navbar from './Navbar.astro';
+import Footer from './Footer.astro';
+import '../styles/portfolio.css';
+
+interface Props {
+  /** Page <title> — keep under 60 characters */
+  title: string;
+  /** Meta description — keep under 160 characters */
+  description?: string;
+  /** Open Graph title override (defaults to title) */
+  ogTitle?: string;
+  /** Open Graph description override (defaults to description) */
+  ogDescription?: string;
+}
+
+const {
+  title,
+  description = 'Ramon Henriquez — Systems Technician II and Homelab Engineer building enterprise-grade infrastructure and security operations.',
+  ogTitle,
+  ogDescription,
+} = Astro.props;
+---
+
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <meta name="description" content={description} />
+
+    <!-- Open Graph -->
+    <meta property="og:type"        content="website" />
+    <meta property="og:title"       content={ogTitle ?? title} />
+    <meta property="og:description" content={ogDescription ?? description} />
+    <meta property="og:site_name"   content="Ramon Henriquez" />
+
+    <!-- Theme -->
+    <meta name="theme-color" content="#0d1117" />
+    <meta name="color-scheme" content="dark" />
+
+    <title>{title}</title>
+
+    <!-- Fonts — Inter (headings + body) + JetBrains Mono (utility/code) -->
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link
+      href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap"
+      rel="stylesheet"
+    />
+  </head>
+
+  <body>
+    <Navbar />
+
+    <main id="main-content">
+      <slot />
+    </main>
+
+    <Footer />
+  </body>
+</html>

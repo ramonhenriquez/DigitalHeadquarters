@@ -1,0 +1,47 @@
+---
+/**
+ * Footer.astro
+ * ─────────────────────────────────────────────────────────────────
+ * Site footer — rendered by Layout.astro.
+ * All styles live in portfolio.css (no inline <style> blocks here).
+ *
+ * Left:  Name · role identifier
+ * Right: Quick navigation links
+ */
+
+const year = new Date().getFullYear();
+
+const quickLinks = [
+  { label: 'Projects',      href: '/projects'      },
+  { label: 'Documentation', href: '/documentation' },
+  { label: 'Contact',       href: '/contact'       },
+  { label: 'GitHub',        href: 'https://github.com/yourusername', external: true },
+];
+---
+
+<footer class="footer">
+  <div class="footer__inner container">
+
+    <div class="footer__left">
+      <span class="footer__id">
+        Ramon Henriquez · Systems Engineer
+      </span>
+      <span class="footer__copy">
+        &copy; {year} · Built with Astro · Deployed on GitHub Pages
+      </span>
+    </div>
+
+    <nav class="footer__links" aria-label="Footer navigation">
+      {quickLinks.map(link => (
+        <a
+          href={link.href}
+          class="footer__link"
+          {...link.external ? { target: '_blank', rel: 'noopener noreferrer' } : {}}
+        >
+          {link.label}
+        </a>
+      ))}
+    </nav>
+
+  </div>
+</footer>

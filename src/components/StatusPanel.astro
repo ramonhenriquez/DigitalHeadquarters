@@ -1,0 +1,69 @@
+---
+/**
+ * StatusPanel.astro
+ * ─────────────────────────────────────────────────────────────────
+ * Enterprise-styled infrastructure status display.
+ * Used inside Hero.astro; can also be reused on an Infrastructure page.
+ *
+ * Props:
+ *   rows   — array of StatusRow objects (service name, fill %, metric, badge)
+ *   label  — panel header label (default: "HOMELAB STATUS")
+ *
+ * The `color` field on each row controls the badge style:
+ *   "green"  → RUNNING / ACTIVE / HEALTHY
+ *   "blue"   → MONITORING / CONNECTED / STANDBY
+ *   "amber"  → DEGRADED / WARNING (use sparingly)
+ */
+
+export interface StatusRow {
+  /** Monospace service identifier shown on the left */
+  name: string;
+  /** Health bar fill, e.g. "94%" */
+  fill: string;
+  /** Short metric string shown right of the bar, e.g. "3 nodes · 12 VMs" */
+  meta: string;
+  /** Badge label, e.g. "RUNNING" */
+  badge: string;
+  /** Badge color variant */
+  color: 'green' | 'blue' | 'amber';
+}
+
+interface Props {
+  rows: StatusRow[];
+  label?: string;
+}
+
+const { rows, label = 'HOMELAB STATUS' } = Astro.props;
+---
+
+<div class="status-panel" role="region" aria-label="Homelab infrastructure status">
+
+  <!-- Header row -->
+  <div class="status-panel__header">
+    <div class="status-panel__label">
+      <span class="pulse-ring" aria-hidden="true"></span>
+      <span class="mono text-xs text-muted">{label}</span>
+    </div>
+    <span class="badge badge--nominal">ALL SYSTEMS NOMINAL</span>
+  </div>
+
+  <!-- Service rows -->
+  <div class="status-panel__body">
+    {rows.map(row => (
+      <div class="status-row">
+        <span class="status-row__name">{row.name}</span>
+
+        <div class="status-row__track" aria-hidden="true">
+          <div class="status-row__fill" style={`width: ${row.fill}`}></div>
+        </div>
+
+        <span class="status-row__meta">{row.meta}</span>
+
+        <span class={`row-badge row-badge--${row.color}`} role="status">
+          {row.badge}
+        </span>
+      </div>
+    ))}
+  </div>
+
+</div>

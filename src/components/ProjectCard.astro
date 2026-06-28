@@ -1,0 +1,58 @@
+---
+/**
+ * ProjectCard.astro
+ * ─────────────────────────────────────────────────────────────────
+ * Project card used in the homepage grid and /projects listing.
+ *
+ * Props:
+ *   title        — project name
+ *   description  — 2–3 sentence summary
+ *   tags         — tech stack labels (aim for 4)
+ *   statusLabel  — badge text, e.g. "Production"
+ *   statusColor  — "green" | "blue" | "amber"
+ *   href         — destination URL
+ *   category     — category eyebrow, e.g. "VIRTUALIZATION" (optional)
+ */
+
+interface Props {
+  title: string;
+  description: string;
+  tags: string[];
+  statusLabel: string;
+  statusColor: 'green' | 'blue' | 'amber';
+  href: string;
+  category?: string;
+}
+
+const { title, description, tags, statusLabel, statusColor, href, category } = Astro.props;
+---
+
+<a href={href} class="project-card">
+
+  <!-- Header: category label (left) + status pill (right) -->
+  <div class="project-card__header">
+    {category && (
+      <span class="card-category">{category}</span>
+    )}
+    <span class={`status-pill status-pill--${statusColor}`}>
+      {statusLabel}
+    </span>
+  </div>
+
+  <!-- Title -->
+  <h3 class="project-card__title">{title}</h3>
+
+  <!-- Description -->
+  <p class="project-card__desc">{description}</p>
+
+  <!-- Tech tags -->
+  <div class="project-card__tags" aria-label="Technologies used">
+    {tags.map(tag => <span class="tag">{tag}</span>)}
+  </div>
+
+  <!-- Footer -->
+  <div class="project-card__footer">
+    <span class="card-link">Read more →</span>
+  </div>
+
+</a>

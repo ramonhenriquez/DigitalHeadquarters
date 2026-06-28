@@ -1,0 +1,55 @@
+---
+/**
+ * TechStack.astro
+ * ─────────────────────────────────────────────────────────────────
+ * Technology stack / skills section.
+ *
+ * Renders a responsive grid of category groups, each containing
+ * a list of skill items. Data is passed as props from the parent
+ * page so TechStack stays presentation-only.
+ *
+ * Props:
+ *   groups — array of { category: string, skills: string[] }
+ */
+
+export interface SkillGroup {
+  /** Category label — displayed in monospace as the group header */
+  category: string;
+  /** Individual skills within the category */
+  skills: string[];
+}
+
+interface Props {
+  groups: SkillGroup[];
+}
+
+const { groups } = Astro.props;
+---
+
+<section id="skills" class="section" aria-labelledby="skills-heading">
+  <div class="container">
+
+    <div class="section-header">
+      <span class="section-eyebrow">TECHNICAL PROFICIENCY</span>
+      <h2 class="section-title" id="skills-heading">Skills &amp; Technologies</h2>
+      <p class="section-desc">
+        Tools, platforms, and protocols I work with across infrastructure,
+        security, and systems operations.
+      </p>
+    </div>
+
+    <div class="skills-grid">
+      {groups.map(group => (
+        <div class="skill-group">
+          <h3 class="skill-group__title">{group.category}</h3>
+          <ul class="skill-list" role="list">
+            {group.skills.map(skill => (
+              <li class="skill-item">{skill}</li>
+            ))}
+          </ul>
+        </div>
+      ))}
+    </div>
+
+  </div>
+</section>

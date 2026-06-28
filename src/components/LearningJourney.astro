@@ -1,0 +1,89 @@
+---
+/**
+ * LearningJourney.astro
+ * ─────────────────────────────────────────────────────────────────
+ * Vertical timeline showing Ramon's homelab-to-SOC-analyst progression.
+ * Each milestone has a status (completed / in-progress / planned)
+ * that drives the dot color and badge style.
+ *
+ * Props:
+ *   milestones — array of Milestone objects (see interface below)
+ *
+ * To add a new milestone, push an object to the `milestones` array
+ * in index.astro and it will render automatically.
+ */
+
+export interface Milestone {
+  /** Quarter / year label, e.g. "Q4 2023" */
+  date: string;
+  /** Card heading */
+  title: string;
+  /** One or two sentence description */
+  description: string;
+  /** Small tech tags below the description */
+  tags: string[];
+  /** Controls dot color and badge label */
+  status: 'completed' | 'in-progress' | 'planned';
+}
+
+interface Props {
+  milestones: Milestone[];
+}
+
+const { milestones } = Astro.props;
+
+const badgeLabel: Record<Milestone['status'], string> = {
+  completed:   'Completed',
+  'in-progress': 'In Progress',
+  planned:     'Planned',
+};
+---
+
+<section
+  class="section learning-section"
+  aria-labelledby="journey-heading"
+>
+  <div class="container">
+
+    <div class="section-header">
+      <span class="section-eyebrow">GROWTH TRAJECTORY</span>
+      <h2 class="section-title" id="journey-heading">Learning Journey</h2>
+      <p class="section-desc">
+        The path from homelabber to security operations — one system at a time.
+      </p>
+    </div>
+
+    <div class="timeline" role="list">
+      {milestones.map(milestone => (
+        <div class="milestone" role="listitem">
+
+          <!-- Dot on the timeline line -->
+          <div class="milestone__marker" aria-hidden="true">
+            <span class={`milestone__dot milestone__dot--${milestone.status}`}></span>
+          </div>
+
+          <!-- Card -->
+          <div class="milestone__card">
+            <div class="milestone__header">
+              <span class="milestone__date">{milestone.date}</span>
+              <span class={`milestone__badge milestone__badge--${milestone.status}`}>
+                {badgeLabel[milestone.status]}
+              </span>
+            </div>
+
+            <h3 class="milestone__title">{milestone.title}</h3>
+            <p class="milestone__desc">{milestone.description}</p>
+
+            {milestone.tags.length > 0 && (
+              <div class="milestone__tags" aria-label="Related technologies">
+                {milestone.tags.map(tag => <span class="tag">{tag}</span>)}
+              </div>
+            )}
+          </div>
+
+        </div>
+      ))}
+    </div>
+
+  </div>
+</section>

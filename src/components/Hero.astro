@@ -1,0 +1,64 @@
+---
+/**
+ * Hero.astro
+ * ─────────────────────────────────────────────────────────────────
+ * Homepage hero section.
+ *
+ * StatusPanel rows mirror the 6 core projects so visitors
+ * immediately see what's running. Update meta strings to reflect
+ * real uptime data; swap to a live API later by replacing the
+ * static array with a fetch() in the frontmatter.
+ */
+
+import StatusPanel from './StatusPanel.astro';
+import type { StatusRow } from './StatusPanel.astro';
+
+const statusRows: StatusRow[] = [
+  { name: 'proxmox.homelab',   fill: '94%',  meta: '3 nodes · 12 VMs',   badge: 'RUNNING',    color: 'green' },
+  { name: 'wazuh.siem',        fill: '88%',  meta: '147 events/h',        badge: 'ACTIVE',     color: 'green' },
+  { name: 'active.directory',  fill: '99%',  meta: '12 users · 4 GPOs',   badge: 'HEALTHY',    color: 'green' },
+  { name: 'bookstack.docs',    fill: '100%', meta: '23 articles synced',   badge: 'ONLINE',     color: 'blue'  },
+  { name: 'jellyfin.media',    fill: '100%', meta: '2 streams · 4K ready', badge: 'STREAMING',  color: 'blue'  },
+];
+---
+
+<section class="hero" aria-label="Introduction">
+  <div class="hero__glow" aria-hidden="true"></div>
+
+  <div class="hero__content container">
+
+    <div class="hero__eyebrow">
+      <span class="badge badge--available">AVAILABLE FOR OPPORTUNITIES</span>
+    </div>
+
+    <h1 class="hero__name">Ramon Henriquez</h1>
+
+    <p class="hero__roles" aria-label="Current titles">
+      <span>Systems Technician II</span>
+      <span class="role-sep" aria-hidden="true">·</span>
+      <span>Homelab Engineer</span>
+      <span class="role-sep" aria-hidden="true">·</span>
+      <span class="role-highlight">Aspiring SOC Analyst</span>
+    </p>
+
+    <p class="hero__tagline">
+      I build and document enterprise-inspired infrastructure, security
+      monitoring, and self-hosted services through a practical homelab
+      environment.
+    </p>
+
+    <StatusPanel rows={statusRows} />
+
+    <div class="hero__actions">
+      <a href="/projects"   class="btn btn--primary">View Projects</a>
+      <a
+        href="https://github.com/yourusername"
+        class="btn btn--outline"
+        target="_blank"
+        rel="noopener noreferrer"
+      >GitHub Profile</a>
+      <a href="/resume" class="btn btn--ghost">Download Resume</a>
+    </div>
+
+  </div>
+</section>

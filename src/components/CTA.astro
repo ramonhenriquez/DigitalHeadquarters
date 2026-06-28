@@ -1,0 +1,77 @@
+---
+/**
+ * CTA.astro
+ * ─────────────────────────────────────────────────────────────────
+ * Reusable call-to-action section block.
+ *
+ * Can be dropped at the bottom of any page with custom messaging
+ * and action buttons.
+ *
+ * Props:
+ *   title       — CTA heading
+ *   description — supporting paragraph
+ *   actions     — array of button config objects
+ *
+ * Button variants: "primary" | "outline" | "ghost"
+ *
+ * Example usage:
+ *   <CTA
+ *     title="Let's connect"
+ *     description="Open to SOC analyst and infrastructure roles."
+ *     actions={[
+ *       { label: 'GitHub',    href: 'https://github.com/...', variant: 'primary', external: true },
+ *       { label: 'Resume',   href: '/resume',               variant: 'outline' },
+ *       { label: 'Email Me', href: 'mailto:you@example.com', variant: 'ghost'  },
+ *     ]}
+ *   />
+ */
+
+export interface CTAAction {
+  label: string;
+  href: string;
+  variant: 'primary' | 'outline' | 'ghost';
+  /** Opens in a new tab and adds rel="noopener noreferrer" */
+  external?: boolean;
+}
+
+interface Props {
+  title: string;
+  description: string;
+  actions: CTAAction[];
+  /** Optional aria id suffix (avoids duplicate heading IDs on pages with multiple CTAs) */
+  headingId?: string;
+}
+
+const {
+  title,
+  description,
+  actions,
+  headingId = 'cta-heading',
+} = Astro.props;
+---
+
+<section class="cta-section" aria-labelledby={headingId}>
+  <div class="container">
+    <div class="cta-card">
+
+      <div class="cta-card__text">
+        <h2 class="cta-card__title" id={headingId}>{title}</h2>
+        <p class="cta-card__desc">{description}</p>
+      </div>
+
+      <div class="cta-card__actions">
+        {actions.map(action => (
+          <a
+            href={action.href}
+            class={`btn btn--${action.variant}`}
+            target={action.external ? '_blank' : undefined}
+            rel={action.external ? 'noopener noreferrer' : undefined}
+          >
+            {action.label}
+          </a>
+        ))}
+      </div>
+
+    </div>
+  </div>
+</section>
