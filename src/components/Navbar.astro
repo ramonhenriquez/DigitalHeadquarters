@@ -53,7 +53,7 @@ const { pathname } = Astro.url;
       <!-- Resume CTA — always visible -->
       <li>
         <a
-          href="/resume"
+          href={`${import.meta.env.BASE_URL}resume/`}
           class="btn btn--sm btn--outline"
           aria-label="View resume"
         >
