@@ -1,11 +1,18 @@
 ---
+/**
+ * Navbar.astro
+ * ------------------------------------------------------------
+ * Main navigation for the Digital Headquarters.
+ * Uses BASE_URL so it works locally and on GitHub Pages.
+ */
+
 const BASE = import.meta.env.BASE_URL;
 
 const navLinks = [
-  { label: 'Infrastructure', href: `${BASE}#infrastructure` },
-  { label: 'Projects', href: `${BASE}#projects` },
-  { label: 'Documentation', href: `${BASE}#documentation` },
-  { label: 'Contact', href: `${BASE}#contact` },
+  { label: "Infrastructure", href: `${BASE}#infrastructure` },
+  { label: "Projects", href: `${BASE}#projects` },
+  { label: "Documentation", href: `${BASE}#documentation` },
+  { label: "Contact", href: `${BASE}#contact` },
 ];
 
 const { pathname } = Astro.url;
@@ -13,30 +20,48 @@ const { pathname } = Astro.url;
 
 <nav class="nav" aria-label="Main navigation">
   <div class="nav__inner container">
-    <a class="nav__brand" href={BASE} aria-label="Ramon Henriquez home">
+
+    <!-- Brand -->
+    <a
+      class="nav__brand"
+      href={BASE}
+      aria-label="Ramon Henriquez Home"
+    >
       <span class="nav__brand-monogram">RH</span>
       <span class="nav__brand-sep">/</span>
       <span class="text-muted">homelab.engineer</span>
-      <span class="nav__status-dot" title="All systems operational" aria-hidden="true"></span>
+      <span
+        class="nav__status-dot"
+        title="All systems operational"
+        aria-hidden="true"
+      ></span>
     </a>
 
+    <!-- Navigation Links -->
     <ul class="nav__links" role="list">
-      {navLinks.map(link => (
+      {navLinks.map((link) => (
         <li class="nav__hide-mobile">
-          <a href={link.href}>{link.label}</a>
+          <a
+            href={link.href}
+            aria-current={pathname === link.href ? "page" : undefined}
+          >
+            {link.label}
+          </a>
         </li>
       ))}
 
+      <!-- Resume Button -->
       <li>
         <a
           href={`${BASE}resume/`}
           class="btn btn--sm btn--outline"
-          aria-label="View resume"
-          aria-current={pathname.includes('/resume') ? 'page' : undefined}
+          aria-label="View Resume"
+          aria-current={pathname.includes("/resume") ? "page" : undefined}
         >
           Resume
         </a>
       </li>
     </ul>
+
   </div>
 </nav>
