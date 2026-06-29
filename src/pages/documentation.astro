@@ -1,0 +1,295 @@
+---
+/**
+ * src/pages/documentation.astro
+ * ─────────────────────────────────────────────────────────────────
+ * Documentation Showcase — Digital Headquarters
+ *
+ * Content standards:
+ *   - No fake links. "link" field must be a real URL or null.
+ *   - No fabricated metrics or statistics.
+ *   - BookStack content is private — do not link unless a public
+ *     URL is provided. Add the URL to the card's `link` field
+ *     when one becomes available.
+ *   - GitHub content is public — link when the page/file exists.
+ *
+ * To add a public link to a card: set link: 'https://...'
+ * To add a coming-next item:      push to comingNext array
+ */
+
+import Layout from '../components/Layout.astro';
+
+const BASE = import.meta.env.BASE_URL;
+
+// ─── DOCUMENTATION AREAS ──────────────────────────────────────────
+// platform: 'private'  → BookStack internal (no public link)
+//           'github'   → GitHub public (link when available)
+// link:     string     → shows "View write-up" button
+//           null       → no button rendered
+
+const docAreas = [
+  {
+    title: 'Active Directory Lab',
+    platform: 'private' as const,
+    platformLabel: 'BookStack',
+    statusLabel: 'Active',
+    statusColor: 'green' as const,
+    description:
+      'Deployment notes covering domain setup, OU design, and Group Policy configuration. Each step is documented with the reasoning behind configuration decisions — not just what was done, but why.',
+    topics: ['AD DS Setup', 'DNS Configuration', 'OU Structure', 'Group Policy Baselines', 'Security Banner GPO'],
+    link: null,
+  },
+  {
+    title: 'Wazuh + Suricata Integration',
+    platform: 'private' as const,
+    platformLabel: 'BookStack',
+    statusLabel: 'Active',
+    statusColor: 'green' as const,
+    description:
+      'End-to-end deployment documentation covering agent installation across Linux, Fedora, and Windows endpoints, Suricata eve.json integration with the Wazuh server, and the alert review workflow.',
+    topics: ['Wazuh Dashboard Setup', 'Fedora Agent Deployment', 'Windows Endpoint Monitoring', 'Suricata eve.json Ingestion', 'Alert Review Process'],
+    link: null,
+  },
+  {
+    title: 'Proxmox Homelab',
+    platform: 'private' as const,
+    platformLabel: 'BookStack',
+    statusLabel: 'Active',
+    statusColor: 'green' as const,
+    description:
+      'Architecture and operational notes covering how VMs and containers are organized, storage allocation decisions, backup configuration, and how services are distributed across the lab.',
+    topics: ['VM & Container Organization', 'Storage Planning', 'Backup Configuration', 'Migration Notes', 'Service Placement'],
+    link: null,
+  },
+  {
+    title: 'BookStack Knowledge Base',
+    platform: 'private' as const,
+    platformLabel: 'BookStack',
+    statusLabel: 'Active',
+    statusColor: 'green' as const,
+    description:
+      'Meta-documentation — how the documentation system itself is organized. Book and page structure, naming conventions, screenshot standards, and the process for keeping runbooks current as the lab evolves.',
+    topics: ['Runbook Structure', 'Naming Conventions', 'Screenshot Standards', 'Troubleshooting Logs', 'Lessons Learned'],
+    link: null,
+  },
+  {
+    title: 'GitHub Portfolio Documentation',
+    platform: 'github' as const,
+    platformLabel: 'GitHub',
+    statusLabel: 'In Progress',
+    statusColor: 'blue' as const,
+    description:
+      'Public-facing project write-ups maintained in this repository. Content is sanitized for public sharing — sensitive infrastructure details stay in BookStack. Updated as projects mature.',
+    topics: ['Project Write-ups', 'Architecture Notes', 'Sanitized Screenshots', 'Portfolio Updates'],
+    link: null, // replace with: 'https://github.com/yourusername/yourrepo'
+  },
+  {
+    title: 'Security+ & SOC Learning Notes',
+    platform: 'private' as const,
+    platformLabel: 'BookStack',
+    statusLabel: 'In Progress',
+    statusColor: 'blue' as const,
+    description:
+      'Study notes organized by Security+ domain. Practical examples drawn from homelab experience are mapped to exam scenarios — connecting what I have built to what I am learning.',
+    topics: ['PBQ Practice Scenarios', 'Incident Response Concepts', 'SIEM Alert Analysis', 'Networking Fundamentals', 'Security Fundamentals'],
+    link: null,
+  },
+];
+
+// ─── COMING NEXT ──────────────────────────────────────────────────
+// Future public write-ups planned for GitHub. Honest placeholders.
+const comingNext = [
+  'Active Directory Lab — public GitHub write-up',
+  'Wazuh + Suricata — deployment walkthrough',
+  'Proxmox Architecture — network and storage overview',
+  'Security+ Study Notes — condensed public version',
+];
+---
+
+<Layout
+  title="Documentation — Ramon Henriquez"
+  description="How Ramon Henriquez documents homelab infrastructure, security deployments, and lessons learned. BookStack for internal runbooks, GitHub for public write-ups."
+>
+
+  <!-- ══════════════════════════════════════════════════════════
+       PAGE INTRO
+       ══════════════════════════════════════════════════════════ -->
+  <section class="section" aria-labelledby="doc-page-heading">
+    <div class="container">
+
+      <div class="section-header">
+        <span class="section-eyebrow">DOCUMENTATION</span>
+        <h1 class="section-title" id="doc-page-heading">How I Document My Work</h1>
+        <p class="section-desc">
+          Documentation is part of the work — not a step that happens afterward.
+          Every deployment, troubleshooting session, and architectural decision gets written down.
+        </p>
+      </div>
+
+      <blockquote class="doc-philosophy">
+        "I document deployments, troubleshooting steps, architecture decisions, screenshots,
+        and lessons learned so each project becomes reusable knowledge — for my future self
+        and for anyone reviewing my work."
+      </blockquote>
+
+    </div>
+  </section>
+
+
+  <!-- ══════════════════════════════════════════════════════════
+       DOCUMENTATION AREAS
+       ══════════════════════════════════════════════════════════ -->
+  <section class="section section--raised" aria-labelledby="areas-heading">
+    <div class="container">
+
+      <div class="section-header">
+        <span class="section-eyebrow">DOCUMENTATION AREAS</span>
+        <h2 class="section-title" id="areas-heading">What Gets Documented</h2>
+        <p class="section-desc">
+          Each project area has dedicated documentation. Private content lives in BookStack.
+          Public write-ups are published to GitHub as they are completed.
+        </p>
+      </div>
+
+      <!-- Doc card grid — reuses projects-grid layout -->
+      <div class="projects-grid">
+        {docAreas.map(area => (
+          <div class="doc-card">
+
+            <!-- Platform badge + status -->
+            <div class="doc-card__header">
+              <span class={`doc-platform doc-platform--${area.platform}`}>
+                {area.platformLabel}
+              </span>
+              <span class={`status-pill status-pill--${area.statusColor}`}>
+                {area.statusLabel}
+              </span>
+            </div>
+
+            <h3 class="doc-card__title">{area.title}</h3>
+            <p class="doc-card__desc">{area.description}</p>
+
+            <!-- Topic tags -->
+            <div class="doc-card__tags">
+              {area.topics.map(topic => (
+                <span class="tag">{topic}</span>
+              ))}
+            </div>
+
+            <!-- View link — only rendered when a real URL exists -->
+            {area.link && (
+              <div class="doc-card__footer">
+                <a
+                  href={area.link}
+                  class="card-link"
+                  target="_blank"
+                  rel="noopener noreferrer"
+                >
+                  View write-up →
+                </a>
+              </div>
+            )}
+
+          </div>
+        ))}
+      </div>
+
+    </div>
+  </section>
+
+
+  <!-- ══════════════════════════════════════════════════════════
+       WHERE IT LIVES
+       ══════════════════════════════════════════════════════════ -->
+  <section class="section" aria-labelledby="workflow-heading">
+    <div class="container">
+
+      <div class="section-header">
+        <span class="section-eyebrow">DOCUMENTATION WORKFLOW</span>
+        <h2 class="section-title" id="workflow-heading">Where It Lives</h2>
+        <p class="section-desc">
+          Two tools, two purposes. Internal and external documentation are kept separate intentionally.
+        </p>
+      </div>
+
+      <div class="doc-workflow">
+
+        <!-- BookStack -->
+        <div class="doc-workflow__card">
+          <p class="doc-workflow__label">Internal</p>
+          <h3 class="doc-workflow__title">BookStack</h3>
+          <p class="doc-workflow__desc">
+            The primary documentation tool. All runbooks, architecture decisions, troubleshooting
+            logs, and screenshots live here. Private — not publicly linked unless explicitly shared.
+          </p>
+          <ul class="doc-workflow__list">
+            <li class="doc-workflow__item">Deployment runbooks with step-by-step instructions</li>
+            <li class="doc-workflow__item">Network diagrams and architecture notes</li>
+            <li class="doc-workflow__item">Troubleshooting logs and resolution records</li>
+            <li class="doc-workflow__item">Lessons learned from each project</li>
+            <li class="doc-workflow__item">Screenshots and configuration references</li>
+          </ul>
+        </div>
+
+        <!-- GitHub -->
+        <div class="doc-workflow__card">
+          <p class="doc-workflow__label">Public</p>
+          <h3 class="doc-workflow__title">GitHub</h3>
+          <p class="doc-workflow__desc">
+            Public-facing portfolio documentation. Sanitized write-ups that can be shared with
+            employers and the broader community. Sensitive infrastructure details are excluded.
+          </p>
+          <ul class="doc-workflow__list">
+            <li class="doc-workflow__item">Project overviews and architecture summaries</li>
+            <li class="doc-workflow__item">Sanitized deployment walkthroughs</li>
+            <li class="doc-workflow__item">Lessons learned (non-sensitive)</li>
+            <li class="doc-workflow__item">This portfolio site — source and content</li>
+            <li class="doc-workflow__item">Resume and professional documentation</li>
+          </ul>
+        </div>
+
+      </div>
+    </div>
+  </section>
+
+
+  <!-- ══════════════════════════════════════════════════════════
+       COMING NEXT
+       ══════════════════════════════════════════════════════════ -->
+  <section class="section section--raised" aria-labelledby="coming-heading">
+    <div class="container">
+
+      <div class="section-header">
+        <span class="section-eyebrow">ROADMAP</span>
+        <h2 class="section-title" id="coming-heading">Coming Next</h2>
+      </div>
+
+      <div class="coming-next__card">
+        <p class="coming-next__intro">
+          These write-ups are planned for public release on GitHub. Each one will be a
+          sanitized walkthrough of a completed homelab project — technical enough to be
+          useful, appropriate for public sharing.
+        </p>
+        <div class="coming-next__items">
+          {comingNext.map(item => (
+            <div class="coming-next__chip">
+              <span class="coming-badge">PLANNED</span>
+              {item}
+            </div>
+          ))}
+        </div>
+      </div>
+
+    </div>
+  </section>
+
+
+  <!-- ══════════════════════════════════════════════════════════
+       BACK NAVIGATION
+       ══════════════════════════════════════════════════════════ -->
+  <section class="section">
+    <div class="container" style="text-align: center;">
+      <a href={`${BASE}`} class="btn btn--ghost">&larr; Back to Home</a>
+    </div>
+  </section>
+
+</Layout>

@@ -1,62 +1,77 @@
 ---
 /**
  * Navbar.astro
- * ------------------------------------------------------------
- * Main navigation for the Digital Headquarters.
- * Uses BASE_URL so it works locally and on GitHub Pages.
+ * ─────────────────────────────────────────────────────────────────
+ * Sticky top navigation bar.
+ *
+ * Uses import.meta.env.BASE_URL for all hrefs so links resolve
+ * correctly on both localhost and GitHub Pages subdirectory deploys.
+ *
+ * Active page detection:
+ *   - Anchor links (#section) are never marked active — they
+ *     are homepage anchors, not standalone pages.
+ *   - Real page routes (/documentation/, /resume/) are marked
+ *     active when pathname matches.
+ *
+ * To promote an anchor link to a real page:
+ *   Change: href: `${BASE}#pagename`
+ *   To:     href: `${BASE}pagename/`
+ *   Then create src/pages/pagename.astro
  */
 
 const BASE = import.meta.env.BASE_URL;
-
-const navLinks = [
-  { label: "Infrastructure", href: `${BASE}#infrastructure` },
-  { label: "Projects", href: `${BASE}#projects` },
-  { label: "Documentation", href: `${BASE}#documentation` },
-  { label: "Contact", href: `${BASE}#contact` },
-];
-
 const { pathname } = Astro.url;
+
+// Returns true when a nav link should be marked aria-current="page".
+// Anchor links (#section) are never active — they live on the homepage.
+// Real routes are active when the current pathname includes the route segment.
+function isActivePage(href: string): boolean {
+  if (href.includes('#')) return false;
+  const routeSegment = href.replace(BASE, '').replace(/\//g, '');
+  return routeSegment.length > 0 && pathname.includes(routeSegment);
+}
+
+// Update href from `${BASE}#pagename` → `${BASE}pagename/` as each page is built.
+// Documentation is now a real page. Infrastructure, Projects, Contact are still anchors.
+const navLinks = [
+  { label: 'Infrastructure', href: `${BASE}#infrastructure`  },
+  { label: 'Projects',       href: `${BASE}#projects`        },
+  { label: 'Documentation',  href: `${BASE}documentation/`   },
+  { label: 'Contact',        href: `${BASE}#contact`         },
+];
 ---
 
 <nav class="nav" aria-label="Main navigation">
   <div class="nav__inner container">
 
     <!-- Brand -->
-    <a
-      class="nav__brand"
-      href={BASE}
-      aria-label="Ramon Henriquez Home"
-    >
+    <a class="nav__brand" href={`${BASE}`} aria-label="Ramon Henriquez — home">
       <span class="nav__brand-monogram">RH</span>
       <span class="nav__brand-sep">/</span>
       <span class="text-muted">homelab.engineer</span>
-      <span
-        class="nav__status-dot"
-        title="All systems operational"
-        aria-hidden="true"
-      ></span>
+      <span class="nav__status-dot" title="All systems operational" aria-hidden="true"></span>
     </a>
 
-    <!-- Navigation Links -->
+    <!-- Links -->
     <ul class="nav__links" role="list">
-      {navLinks.map((link) => (
+      {navLinks.map(link => (
         <li class="nav__hide-mobile">
           <a
             href={link.href}
-            aria-current={pathname === link.href ? "page" : undefined}
+            aria-current={isActivePage(link.href) ? 'page' : undefined}
           >
             {link.label}
           </a>
         </li>
       ))}
 
-      <!-- Resume Button -->
+      <!-- Resume — always visible -->
       <li>
         <a
           href={`${BASE}resume/`}
           class="btn btn--sm btn--outline"
-          aria-label="View Resume"
-          aria-current={pathname.includes("/resume") ? "page" : undefined}
+          aria-label="View online resume"
+          aria-current={pathname.includes('/resume') ? 'page' : undefined}
         >
           Resume
         </a>
