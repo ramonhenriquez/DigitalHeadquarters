@@ -1,0 +1,313 @@
+---
+/**
+ * src/pages/resume.astro
+ * ─────────────────────────────────────────────────────────────────
+ * Online resume — Ramon Henriquez
+ *
+ * Pure Astro/HTML/CSS. No client-side JavaScript.
+ *
+ * PDF download link uses import.meta.env.BASE_URL so the path
+ * resolves correctly whether the site is at the domain root or
+ * a GitHub Pages subdirectory (e.g. /username.github.io/repo/).
+ *
+ * SETUP: Place your resume PDF at:
+ *   public/resume.pdf
+ * It will be served at {BASE_URL}resume.pdf automatically.
+ */
+
+import Layout from '../components/Layout.astro';
+
+const BASE = import.meta.env.BASE_URL;
+---
+
+<Layout
+  title="Resume — Ramon Henriquez"
+  description="Resume of Ramon Henriquez — Systems Technician II with 4+ years in IT support, security monitoring, and infrastructure. Aspiring SOC Analyst."
+>
+  <div class="resume-page">
+    <div class="resume-container">
+
+
+      <!-- ══════════════════════════════════════════════════════════
+           PAGE HEADER — name, contact, download CTA
+           ══════════════════════════════════════════════════════════ -->
+      <header class="resume-header">
+
+        <h1 class="resume-name">Ramon Henriquez</h1>
+
+        <p class="resume-headline">
+          Systems Technician II &middot; Homelab Engineer &middot; Aspiring SOC Analyst
+        </p>
+
+        <!-- Contact info -->
+        <div class="resume-contact" aria-label="Contact information">
+
+          <div class="resume-contact__item">
+            <span class="resume-contact__label">Location</span>
+            <span class="resume-contact__value">Plantation, FL</span>
+          </div>
+
+          <div class="resume-contact__item">
+            <span class="resume-contact__label">Email</span>
+            <span class="resume-contact__value">
+              <a href="mailto:ramonhenriquez301@gmail.com">ramonhenriquez301@gmail.com</a>
+            </span>
+          </div>
+
+          <div class="resume-contact__item">
+            <span class="resume-contact__label">Phone</span>
+            <span class="resume-contact__value">
+              <a href="tel:+19548513522">954-851-3522</a>
+            </span>
+          </div>
+
+        </div>
+
+        <!-- Header actions -->
+        <div class="resume-header__actions">
+          <a
+            href={`${BASE}resume.pdf`}
+            download
+            class="btn btn--primary"
+            aria-label="Download PDF resume"
+          >
+            Download PDF Resume
+          </a>
+          <a href={`${BASE}`} class="btn btn--ghost">&larr; Back to Home</a>
+        </div>
+
+      </header>
+
+
+      <!-- ══════════════════════════════════════════════════════════
+           PROFESSIONAL SUMMARY
+           ══════════════════════════════════════════════════════════ -->
+      <section class="resume-section" aria-labelledby="summary-heading">
+        <h2 class="resume-section__title" id="summary-heading">Professional Summary</h2>
+
+        <p class="resume-summary">
+          IT Support professional with 4+ years of experience supporting healthcare,
+          managed services, and government environments, with hands-on exposure to
+          cybersecurity operations including security monitoring, incident response,
+          malware remediation, and endpoint detection and response. Proven ability to
+          investigate security alerts, remediate threats, and support Active Directory,
+          Microsoft 365, and network infrastructure. Associate of Science in Information
+          Technology with a concentration in Cybersecurity.
+        </p>
+      </section>
+
+
+      <!-- ══════════════════════════════════════════════════════════
+           EXPERIENCE
+           ══════════════════════════════════════════════════════════ -->
+      <section class="resume-section" aria-labelledby="experience-heading">
+        <h2 class="resume-section__title" id="experience-heading">Experience</h2>
+
+
+        <!-- Job 1 -->
+        <div class="resume-job">
+          <div class="resume-job__header">
+            <span class="resume-job__company">Seventeenth Judicial Circuit of Florida</span>
+            <span class="resume-job__date">09/2025 &ndash; Present</span>
+          </div>
+          <p class="resume-job__role">Systems Technician II</p>
+          <p class="resume-job__location">Fort Lauderdale, FL</p>
+          <ul class="resume-job__bullets">
+            <li>Responded to help desk tickets and service requests, delivering technical support and end-user training for court applications and standard business software.</li>
+            <li>Provided operational maintenance and support for desktops, laptops, printers, scanners, and other peripheral devices across courthouse locations.</li>
+            <li>Maintained accurate inventory records for IT equipment, peripherals, and software assets.</li>
+            <li>Installed, configured, upgraded, and customized Windows operating systems, application software, and associated hardware.</li>
+          </ul>
+        </div>
+
+
+        <!-- Job 2 -->
+        <div class="resume-job">
+          <div class="resume-job__header">
+            <span class="resume-job__company">IT Services Express</span>
+            <span class="resume-job__date">10/2023 &ndash; 09/2025</span>
+          </div>
+          <p class="resume-job__role">Technical Support Specialist</p>
+          <p class="resume-job__location">Hallandale Beach, FL</p>
+          <ul class="resume-job__bullets">
+            <li>Monitored and managed client endpoints using N-able RMM and N-able EDR to identify malware detections, security alerts, and system health issues.</li>
+            <li>Assisted with administration of Microsoft Active Directory, file servers, user accounts, permissions, and backup systems.</li>
+            <li>Configured and deployed network infrastructure including switches, routers, firewalls, wireless access points, and IP surveillance systems.</li>
+            <li>Supported backup and disaster recovery operations by monitoring backup jobs and verifying successful restoration of critical client data.</li>
+            <li>Delivered remote and onsite IT support for small and mid-sized business clients.</li>
+          </ul>
+        </div>
+
+
+        <!-- Job 3 -->
+        <div class="resume-job">
+          <div class="resume-job__header">
+            <span class="resume-job__company">Elevate ENT Partners</span>
+            <span class="resume-job__date">07/2021 &ndash; 10/2023</span>
+          </div>
+          <p class="resume-job__role">IT Help Desk Technician</p>
+          <p class="resume-job__location">Miami Lakes, FL</p>
+          <ul class="resume-job__bullets">
+            <li>Provided technical support to clinical and administrative staff via phone, email, and remote tools.</li>
+            <li>Supported healthcare applications, resolving login, workflow, and system issues.</li>
+            <li>Performed workstation deployment, imaging and reimaging, software installation, and hardware troubleshooting.</li>
+            <li>Managed user accounts, password resets, and access permissions in Microsoft Active Directory and Microsoft 365.</li>
+            <li>Documented incidents and resolutions in the help desk ticketing system while maintaining HIPAA compliance.</li>
+          </ul>
+        </div>
+
+      </section>
+
+
+      <!-- ══════════════════════════════════════════════════════════
+           EDUCATION
+           ══════════════════════════════════════════════════════════ -->
+      <section class="resume-section" aria-labelledby="education-heading">
+        <h2 class="resume-section__title" id="education-heading">Education</h2>
+
+
+        <div class="resume-edu-item">
+          <div class="resume-edu__header">
+            <span class="resume-edu__school">Keiser University</span>
+          </div>
+          <p class="resume-edu__degree">AS Information Technology &mdash; Concentration in Cybersecurity</p>
+          <ul class="resume-edu__notes">
+            <li>Coursework focused on networking, systems administration, and cybersecurity fundamentals.</li>
+            <li>Hands-on training in Windows administration, network security, and troubleshooting.</li>
+          </ul>
+        </div>
+
+
+        <div class="resume-edu-item">
+          <div class="resume-edu__header">
+            <span class="resume-edu__school">South Plantation High School</span>
+            <span class="resume-edu__date">05/2019</span>
+          </div>
+          <p class="resume-edu__degree">High School Diploma</p>
+        </div>
+
+      </section>
+
+
+      <!-- ══════════════════════════════════════════════════════════
+           CERTIFICATIONS
+           ══════════════════════════════════════════════════════════ -->
+      <section class="resume-section" aria-labelledby="certs-heading">
+        <h2 class="resume-section__title" id="certs-heading">Certifications</h2>
+
+        <div class="resume-cert">
+          <span class="resume-cert__name">CompTIA Security+</span>
+          <div class="resume-cert__meta">
+            <span class="resume-cert__year">2026</span>
+            <span class="resume-cert__status">CERTIFIED</span>
+          </div>
+        </div>
+
+      </section>
+
+
+      <!-- ══════════════════════════════════════════════════════════
+           TECHNICAL SKILLS
+           ══════════════════════════════════════════════════════════ -->
+      <section class="resume-section" aria-labelledby="skills-heading">
+        <h2 class="resume-section__title" id="skills-heading">Technical Skills</h2>
+
+        <div class="resume-skills-list">
+
+          <div class="resume-skill-row">
+            <span class="resume-skill-row__label">Security &amp; Monitoring</span>
+            <div class="resume-skill-row__tags">
+              <span class="tag">Wazuh SIEM</span>
+              <span class="tag">Suricata IDS/IPS</span>
+              <span class="tag">N-able EDR</span>
+              <span class="tag">N-able RMM</span>
+              <span class="tag">Endpoint Detection &amp; Response</span>
+              <span class="tag">Malware Remediation</span>
+              <span class="tag">Security Alert Triage</span>
+            </div>
+          </div>
+
+          <div class="resume-skill-row">
+            <span class="resume-skill-row__label">Identity &amp; Access</span>
+            <div class="resume-skill-row__tags">
+              <span class="tag">Active Directory</span>
+              <span class="tag">Group Policy (GPO)</span>
+              <span class="tag">Microsoft 365</span>
+              <span class="tag">LDAP / LDAPS</span>
+              <span class="tag">PKI / Certificate Authority</span>
+              <span class="tag">User Provisioning</span>
+            </div>
+          </div>
+
+          <div class="resume-skill-row">
+            <span class="resume-skill-row__label">Networking</span>
+            <div class="resume-skill-row__tags">
+              <span class="tag">pfSense</span>
+              <span class="tag">WireGuard VPN</span>
+              <span class="tag">VLAN Segmentation</span>
+              <span class="tag">Switches &amp; Routers</span>
+              <span class="tag">Firewalls</span>
+              <span class="tag">Wireless APs</span>
+              <span class="tag">IP Surveillance</span>
+            </div>
+          </div>
+
+          <div class="resume-skill-row">
+            <span class="resume-skill-row__label">Virtualization</span>
+            <div class="resume-skill-row__tags">
+              <span class="tag">Proxmox VE</span>
+              <span class="tag">KVM / QEMU</span>
+              <span class="tag">LXC Containers</span>
+              <span class="tag">VMware ESXi</span>
+              <span class="tag">ZFS Storage</span>
+            </div>
+          </div>
+
+          <div class="resume-skill-row">
+            <span class="resume-skill-row__label">Systems &amp; OS</span>
+            <div class="resume-skill-row__tags">
+              <span class="tag">Windows Server</span>
+              <span class="tag">Linux Administration</span>
+              <span class="tag">Windows 10 / 11</span>
+              <span class="tag">PowerShell</span>
+              <span class="tag">Bash</span>
+              <span class="tag">Docker</span>
+            </div>
+          </div>
+
+          <div class="resume-skill-row">
+            <span class="resume-skill-row__label">Support &amp; Operations</span>
+            <div class="resume-skill-row__tags">
+              <span class="tag">Help Desk (Tier 1 / 2)</span>
+              <span class="tag">Remote Support</span>
+              <span class="tag">Backup &amp; Disaster Recovery</span>
+              <span class="tag">HIPAA Compliance</span>
+              <span class="tag">IT Asset Management</span>
+              <span class="tag">Imaging &amp; Deployment</span>
+              <span class="tag">Ticketing Systems</span>
+            </div>
+          </div>
+
+        </div>
+      </section>
+
+
+      <!-- ══════════════════════════════════════════════════════════
+           FOOTER ACTIONS
+           ══════════════════════════════════════════════════════════ -->
+      <div class="resume-footer-actions">
+        <a href={`${BASE}`} class="btn btn--ghost">&larr; Back to Home</a>
+        <a
+          href={`${BASE}resume.pdf`}
+          download
+          class="btn btn--primary"
+          aria-label="Download PDF resume"
+        >
+          Download PDF Resume
+        </a>
+      </div>
+
+
+    </div>
+  </div>
+</Layout>
