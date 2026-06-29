@@ -8,10 +8,11 @@
  *   title        — project name
  *   description  — 2–3 sentence summary
  *   tags         — tech stack labels (aim for 4)
- *   statusLabel  — badge text, e.g. "Production"
+ *   statusLabel  — badge text, e.g. "Active"
  *   statusColor  — "green" | "blue" | "amber"
  *   href         — destination URL
  *   category     — category eyebrow, e.g. "VIRTUALIZATION" (optional)
+ *   external     — true opens in new tab with rel="noopener noreferrer"
  */
 
 interface Props {
@@ -22,12 +23,21 @@ interface Props {
   statusColor: 'green' | 'blue' | 'amber';
   href: string;
   category?: string;
+  external?: boolean;
 }
 
-const { title, description, tags, statusLabel, statusColor, href, category } = Astro.props;
+const { title, description, tags, statusLabel, statusColor, href, category, external } = Astro.props;
+
+// Link label adapts to destination type
+const linkLabel = external ? 'View on GitHub →' : 'Read more →';
 ---
 
-<a href={href} class="project-card">
+<a
+  href={href}
+  class="project-card"
+  target={external ? '_blank' : undefined}
+  rel={external ? 'noopener noreferrer' : undefined}
+>
 
   <!-- Header: category label (left) + status pill (right) -->
   <div class="project-card__header">
@@ -52,7 +62,7 @@ const { title, description, tags, statusLabel, statusColor, href, category } = A
 
   <!-- Footer -->
   <div class="project-card__footer">
-    <span class="card-link">Read more →</span>
+    <span class="card-link">{linkLabel}</span>
   </div>
 
 </a>

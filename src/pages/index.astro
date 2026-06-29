@@ -4,17 +4,17 @@
  * ─────────────────────────────────────────────────────────────────
  * Data + orchestration only. All rendering is handled by components.
  *
- * CONTENT STANDARDS (from master project doc):
- *   - Only list technologies actually deployed
+ * CONTENT STANDARDS:
+ *   - Only list technologies actually in use
  *   - No fabricated metrics or statistics
- *   - Use "planned" / "learning" for roadmap items
- *   - Every claim must be something you can explain in an interview
+ *   - Roadmap items labeled "Planned" — never presented as complete
+ *   - Every claim must be explainable in an interview
  *
  * Section order:
  *   1. Hero             (Hero.astro — includes StatusPanel)
- *   2. Lab Overview     (4 honest pillar cards, replaces fake stats)
- *   3. Projects         (ProjectCard.astro × 6)
- *   4. Tech Stack       (TechStack.astro — master doc list only)
+ *   2. Lab Overview     (4 honest pillar cards)
+ *   3. Projects         (ProjectCard.astro × 6 — links to GitHub repo)
+ *   4. Tech Stack       (TechStack.astro — verified skills only)
  *   5. Learning Journey (LearningJourney.astro)
  *   6. Contact CTA      (CTA.astro)
  */
@@ -31,11 +31,14 @@ import type { CTAAction }  from '../components/CTA.astro';
 
 const BASE = import.meta.env.BASE_URL;
 
+// GitHub documentation repo — base URL for all project links
+const REPO = 'https://github.com/ramonhenriquez/Homelab-Portfolio';
+
 
 // ─── FEATURED PROJECTS ────────────────────────────────────────────
-// Only list what is actually deployed and working.
-// Descriptions use verified, conservative language.
-// Tags: only technologies confirmed in use — nothing from the roadmap.
+// All hrefs point to the public GitHub documentation repo.
+// external: true → opens in new tab with rel="noopener noreferrer"
+// ProjectCard.astro renders "View on GitHub →" for external links.
 
 const projects = [
   {
@@ -46,7 +49,8 @@ const projects = [
     tags: ['Proxmox VE', 'Virtual Machines', 'LXC', 'Linux'],
     statusLabel: 'Active',
     statusColor: 'green' as const,
-    href: `${BASE}projects/homelab/`,
+    href: `${REPO}/tree/main/architecture`,
+    external: true,
   },
   {
     title: 'Wazuh SIEM + Suricata IDS',
@@ -56,7 +60,8 @@ const projects = [
     tags: ['Wazuh', 'Suricata', 'Linux', 'Security Monitoring'],
     statusLabel: 'Active',
     statusColor: 'green' as const,
-    href: `${BASE}projects/wazuh/`,
+    href: `${REPO}/tree/main/projects/wazuh`,
+    external: true,
   },
   {
     title: 'Active Directory Lab',
@@ -66,7 +71,8 @@ const projects = [
     tags: ['Active Directory', 'Windows Server', 'Group Policy', 'DNS'],
     statusLabel: 'Active',
     statusColor: 'green' as const,
-    href: `${BASE}projects/active-directory/`,
+    href: `${REPO}/tree/main/projects/active-directory`,
+    external: true,
   },
   {
     title: 'BookStack Documentation',
@@ -76,7 +82,8 @@ const projects = [
     tags: ['BookStack', 'Linux', 'Self-Hosted', 'Markdown'],
     statusLabel: 'Active',
     statusColor: 'green' as const,
-    href: `${BASE}projects/bookstack/`,
+    href: `${REPO}/tree/main/projects/bookstack`,
+    external: true,
   },
   {
     title: 'Jellyfin Media Server',
@@ -86,7 +93,8 @@ const projects = [
     tags: ['Jellyfin', 'LXC', 'Linux', 'Self-Hosted'],
     statusLabel: 'Active',
     statusColor: 'blue' as const,
-    href: `${BASE}projects/jellyfin/`,
+    href: `${REPO}/tree/main/projects/jellyfin`,
+    external: true,
   },
   {
     title: 'Odysseus AI Lab',
@@ -96,16 +104,19 @@ const projects = [
     tags: ['Ollama', 'Open WebUI', 'Linux', 'Self-Hosted'],
     statusLabel: 'In Progress',
     statusColor: 'blue' as const,
-    href: `${BASE}projects/odysseus-ai/`,
+    href: `${REPO}/tree/main/projects/odysseus-ai`,
+    external: true,
   },
 ];
 
 
 // ─── TECHNOLOGY STACK ─────────────────────────────────────────────
-// Source of truth: master project document.
-// Only technologies actively in use. Roadmap items are excluded.
-// REMOVED: KVM/QEMU, ZFS, Bash, PKI/CA, LDAP, Grafana, Prometheus,
-//          pfSense, WireGuard, Docker, Pi-hole, Tailscale, Uptime Kuma
+// Source of truth: verified skills list from master project document.
+// EXCLUDED: KVM/QEMU, ZFS, Bash, PKI/CA, LDAP, Grafana, Prometheus,
+//           pfSense, WireGuard, Docker, Pi-hole, Tailscale, Uptime Kuma
+//
+// "Home Infrastructure" replaces the former "Networking" group to
+// more accurately reflect the physical lab environment in place.
 
 const skillGroups: SkillGroup[] = [
   {
@@ -117,57 +128,101 @@ const skillGroups: SkillGroup[] = [
     skills: ['Windows Server', 'Linux', 'Fedora', 'Kali Linux'],
   },
   {
-    category: 'Identity & Access',
+    category: 'Identity',
     skills: ['Active Directory', 'Group Policy', 'DNS'],
   },
   {
     category: 'Security',
-    skills: ['Wazuh', 'Suricata', 'SIEM', 'Endpoint Monitoring', 'Security Monitoring'],
+    skills: ['Wazuh', 'Suricata', 'SIEM Fundamentals', 'Endpoint Monitoring', 'Security Monitoring'],
   },
   {
-    category: 'Networking',
-    skills: ['UniFi', 'OpenVPN', 'Basic VLAN Knowledge'],
+    category: 'Home Infrastructure',
+    skills: [
+      'UniFi / UDM SE',
+      'Managed Switches',
+      'IP Cameras (Bullet / Turret)',
+      'NVR',
+      'UNAS',
+      'UPS / Battery Backup',
+      '12U Network Rack',
+      'OpenVPN',
+      'Network Troubleshooting',
+    ],
   },
   {
-    category: 'Documentation & Tools',
-    skills: ['BookStack', 'GitHub', 'Markdown', 'PowerShell', 'Technical Documentation'],
+    category: 'Documentation',
+    skills: ['BookStack', 'GitHub', 'Markdown', 'Technical Documentation', 'Runbooks'],
+  },
+  {
+    category: 'General',
+    skills: ['PowerShell', 'Troubleshooting', 'Help Desk Support', 'Incident Response Practice', 'Hardware / Endpoint Support'],
   },
 ];
 
 
 // ─── LEARNING JOURNEY ─────────────────────────────────────────────
-// Honest timeline. Claims match verified deployments.
-// "planned" status = not yet built. "in-progress" = actively working.
-// REMOVED: ZFS, PKI/CA, LDAP, pfSense gateway claims, GPU passthrough,
-//          air-gapped AI, "150+ rules", "every endpoint"
+// Career milestones use years. Homelab milestones use accurate
+// quarters (corrected by user). No fabricated dates.
+// completed = done | in-progress = active | planned = not started
 
 const milestones: Milestone[] = [
+  // ── Career ────────────────────────────────────────────────────────
   {
-    date: 'Q3 2023',
+    date: '2021',
+    title: 'IT Help Desk — First Role',
+    description:
+      'Started IT career providing technical support to clinical and administrative staff at a healthcare company. Handled ticketing, hardware troubleshooting, workstation imaging, and Microsoft 365 administration while maintaining HIPAA compliance.',
+    tags: ['Help Desk', 'Windows', 'Microsoft 365', 'Healthcare IT'],
+    status: 'completed',
+  },
+  {
+    date: '2023',
+    title: 'MSP Support & Endpoint Management',
+    description:
+      'Moved into managed services, supporting small and mid-sized business clients. Expanded into RMM and EDR tools, network equipment deployment, Active Directory administration, and backup and disaster recovery operations.',
+    tags: ['MSP', 'N-able RMM', 'N-able EDR', 'Networking', 'Active Directory'],
+    status: 'completed',
+  },
+
+  // ── Homelab (dates corrected Q3 2024 – Q2 2026) ──────────────────
+  {
+    date: 'Q3 2024',
     title: 'First Dedicated Homelab Node',
     description:
-      'Repurposed enterprise hardware into a dedicated lab server. Installed Proxmox VE and started learning hypervisor fundamentals through hands-on work rather than coursework alone.',
+      'Repurposed enterprise hardware into a dedicated lab server. Installed Proxmox VE and started learning virtualization fundamentals through hands-on experimentation rather than coursework alone.',
     tags: ['Proxmox VE', 'Hardware', 'Linux'],
     status: 'completed',
   },
   {
-    date: 'Q4 2023',
+    date: 'Q4 2024',
     title: 'Proxmox Cluster Expansion',
     description:
-      'Expanded the lab to a multi-node Proxmox cluster to practice workload distribution, VM migration, and resource management across nodes. First real experience with distributed lab infrastructure.',
+      'Expanded to a multi-node Proxmox environment to practice workload distribution, VM and container management, and resource allocation across multiple hosts.',
     tags: ['Proxmox VE', 'Virtual Machines', 'LXC'],
     status: 'completed',
   },
   {
-    date: 'Q1 2024',
+    date: 'Q2 2025',
     title: 'Active Directory Domain',
     description:
       'Built a Windows Server domain from scratch — Active Directory, Group Policy security baselines, and DNS configuration. Centralized user management and applied security settings across lab machines.',
     tags: ['Active Directory', 'Windows Server', 'Group Policy', 'DNS'],
     status: 'completed',
   },
+
+  // ── Career ────────────────────────────────────────────────────────
   {
-    date: 'Q2 2024',
+    date: '2025',
+    title: 'Systems Technician II — Government IT',
+    description:
+      'Joined the Seventeenth Judicial Circuit of Florida as a Systems Technician II. Supporting courthouse IT operations across multiple locations — hardware, software, and end-user support in a government environment.',
+    tags: ['Government IT', 'Windows', 'Systems Administration', 'IT Support'],
+    status: 'completed',
+  },
+
+  // ── Homelab (continued) ────────────────────────────────────────────
+  {
+    date: 'Q2 2026',
     title: 'Wazuh SIEM & Suricata Integration',
     description:
       'Deployed Wazuh with agents on Linux, Fedora, and Windows endpoints. Integrated Suricata on the Wazuh server to ingest network alerts through eve.json. First hands-on experience with SIEM alerting and security event correlation.',
@@ -175,34 +230,46 @@ const milestones: Milestone[] = [
     status: 'completed',
   },
   {
-    date: 'Q3 2024',
+    date: 'Q2 2026',
     title: 'Odysseus — Self-Hosted AI Lab',
     description:
       'Set up a self-hosted AI environment using Ollama and Open WebUI to experiment with running local language models privately. An early-stage project focused on learning self-hosted AI workflows.',
     tags: ['Ollama', 'Open WebUI', 'Linux'],
     status: 'completed',
   },
+
+  // ── Career ────────────────────────────────────────────────────────
   {
-    date: 'Now',
-    title: 'CompTIA Security+ Certification',
+    date: '2026',
+    title: 'Digital Headquarters Portfolio',
     description:
-      'Studying for Security+ to formalize and validate the security knowledge developed through homelab work and professional experience. Targeting the certification to complement hands-on skills with a recognized credential.',
-    tags: ['Security+', 'CompTIA', 'Certification'],
+      'Built and published Digital Headquarters — a documentation-first portfolio site capturing infrastructure work and professional growth. Expanded public documentation using GitHub and BookStack.',
+    tags: ['GitHub', 'BookStack', 'Documentation', 'Astro'],
+    status: 'completed',
+  },
+
+  // ── Current / Planned ─────────────────────────────────────────────
+  {
+    date: 'Current',
+    title: 'CompTIA Security+ & SOC Skill Building',
+    description:
+      'Studying for CompTIA Security+ to formalize security knowledge developed through professional experience and homelab work. Actively building SOC analyst skills through hands-on projects, SIEM monitoring, and documentation.',
+    tags: ['Security+', 'CompTIA', 'SOC Skills', 'SIEM'],
     status: 'in-progress',
   },
   {
-    date: 'Roadmap',
-    title: 'pfSense, Docker, Pi-hole & More',
+    date: 'Planned',
+    title: 'Infrastructure Expansion',
     description:
-      'Planning to expand the network layer with pfSense for firewall and routing practice, Docker for containerized services, Pi-hole for DNS filtering, and Tailscale for remote access. Each adds a new layer of real-world infrastructure experience.',
-    tags: ['pfSense', 'Docker', 'Pi-hole', 'Tailscale'],
+      'Planning to expand the homelab with pfSense for firewall and routing practice, Docker for containerized services, Pi-hole for DNS filtering, Tailscale for remote access, and Uptime Kuma for service monitoring.',
+    tags: ['pfSense', 'Docker', 'Pi-hole', 'Tailscale', 'Uptime Kuma'],
     status: 'planned',
   },
   {
     date: 'Goal',
     title: 'SOC Analyst — Entry Level',
     description:
-      'Target: a Tier 1 SOC analyst role where SIEM experience, endpoint monitoring, and documentation habits translate directly into value for the team. The lab exists to earn this seat.',
+      'Target: a Tier 1 SOC analyst role where SIEM experience, endpoint monitoring, and documentation habits translate directly into team value. Every homelab project and certification is working toward this seat.',
     tags: ['SOC', 'Security Operations', 'Incident Response'],
     status: 'planned',
   },
@@ -213,7 +280,7 @@ const milestones: Milestone[] = [
 const ctaActions: CTAAction[] = [
   {
     label: 'GitHub',
-    href: 'https://github.com/ramonhenriquez',   // ← update with your username
+    href: 'https://github.com/ramonhenriquez',
     variant: 'primary',
     external: true,
   },
@@ -239,7 +306,7 @@ const ctaActions: CTAAction[] = [
   <Hero />
 
 
-  <!-- ② LAB OVERVIEW — honest pillar cards, no fabricated numbers -->
+  <!-- ② LAB OVERVIEW -->
   <section id="infrastructure" class="section infra-stats" aria-labelledby="lab-overview-heading">
     <div class="container">
 
@@ -330,11 +397,11 @@ const ctaActions: CTAAction[] = [
   <LearningJourney milestones={milestones} />
 
 
-  <!-- ⑥ CONTACT CTA — sectionId enables the #contact nav anchor -->
+  <!-- ⑥ CONTACT CTA -->
   <CTA
     sectionId="contact"
     title="Let's work together"
-    description="Open to SOC analyst, IT operations, and infrastructure engineering roles. I bring hands-on lab experience, a documentation-first mindset, and a genuine interest in security operations."
+    description="Open to SOC Analyst, cybersecurity, and security operations roles where I can apply hands-on infrastructure, monitoring, troubleshooting, and documentation experience."
     actions={ctaActions}
   />
 

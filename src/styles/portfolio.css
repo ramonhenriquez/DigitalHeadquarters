@@ -1765,3 +1765,17 @@ img { max-width: 100%; display: block; }
 @media (max-width: 768px) {
   .doc-workflow { grid-template-columns: 1fr; }
 }
+
+
+/* ----------------------------------------------------------------
+   22. RESUME CERT STATUS VARIANTS
+   Added separately from base .resume-cert__status so the
+   base style (green/certified) still works if needed later.
+   ---------------------------------------------------------------- */
+
+/* In-progress certification — amber instead of green */
+.resume-cert__status--progress {
+  background: var(--amber-dim);
+  color: var(--amber);
+  border: 1px solid rgba(210, 153, 34, 0.18);
+}

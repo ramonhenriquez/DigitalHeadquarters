@@ -2,20 +2,27 @@
 /**
  * Footer.astro
  * ─────────────────────────────────────────────────────────────────
- * Site footer — rendered by Layout.astro.
+ * Site footer — rendered by Layout.astro on every page.
  * All styles live in portfolio.css (no inline <style> blocks here).
  *
- * Left:  Name · role identifier
- * Right: Quick navigation links
+ * Links use import.meta.env.BASE_URL so paths resolve correctly
+ * on both localhost and GitHub Pages subdirectory deployments.
+ *
+ * Link destinations:
+ *   Projects      → homepage #projects anchor (page not yet built)
+ *   Documentation → real page at /documentation/
+ *   Contact       → homepage #contact anchor (page not yet built)
+ *   GitHub        → public profile (external, new tab)
  */
 
+const BASE = import.meta.env.BASE_URL;
 const year = new Date().getFullYear();
 
 const quickLinks = [
-  { label: 'Projects',      href: '/projects'      },
-  { label: 'Documentation', href: '/documentation' },
-  { label: 'Contact',       href: '/contact'       },
-  { label: 'GitHub',        href: 'https://github.com/ramonhenriquez', external: true },
+  { label: 'Projects',      href: `${BASE}#projects`,                        external: false },
+  { label: 'Documentation', href: `${BASE}documentation/`,                   external: false },
+  { label: 'Contact',       href: `${BASE}#contact`,                         external: false },
+  { label: 'GitHub',        href: 'https://github.com/ramonhenriquez',       external: true  },
 ];
 ---
 
@@ -24,10 +31,10 @@ const quickLinks = [
 
     <div class="footer__left">
       <span class="footer__id">
-        Ramon Henriquez · Systems Engineer
+        Ramon Henriquez &middot; Systems Engineer
       </span>
       <span class="footer__copy">
-        &copy; {year} · Built with Astro · Deployed on GitHub Pages
+        &copy; {year} &middot; Built with Astro &middot; Deployed on GitHub Pages
       </span>
     </div>
 
@@ -36,7 +43,8 @@ const quickLinks = [
         <a
           href={link.href}
           class="footer__link"
-          {...link.external ? { target: '_blank', rel: 'noopener noreferrer' } : {}}
+          target={link.external ? '_blank' : undefined}
+          rel={link.external ? 'noopener noreferrer' : undefined}
         >
           {link.label}
         </a>
