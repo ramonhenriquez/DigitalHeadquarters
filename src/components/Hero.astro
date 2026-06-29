@@ -4,21 +4,23 @@
  * ─────────────────────────────────────────────────────────────────
  * Homepage hero section.
  *
- * StatusPanel rows mirror the 6 core projects so visitors
- * immediately see what's running. Update meta strings to reflect
- * real uptime data; swap to a live API later by replacing the
- * static array with a fetch() in the frontmatter.
+ * StatusPanel meta strings use honest, verifiable descriptions —
+ * no fabricated event rates, document counts, or VM numbers.
+ * When real metrics are available (e.g. from an Uptime Kuma API),
+ * replace the static array with a fetch() in the frontmatter.
  */
 
 import StatusPanel from './StatusPanel.astro';
 import type { StatusRow } from './StatusPanel.astro';
 
+const BASE = import.meta.env.BASE_URL;
+
 const statusRows: StatusRow[] = [
-  { name: 'proxmox.homelab',   fill: '94%',  meta: '3 nodes · 12 VMs',   badge: 'RUNNING',    color: 'green' },
-  { name: 'wazuh.siem',        fill: '88%',  meta: '147 events/h',        badge: 'ACTIVE',     color: 'green' },
-  { name: 'active.directory',  fill: '99%',  meta: '12 users · 4 GPOs',   badge: 'HEALTHY',    color: 'green' },
-  { name: 'bookstack.docs',    fill: '100%', meta: '23 articles synced',   badge: 'ONLINE',     color: 'blue'  },
-  { name: 'jellyfin.media',    fill: '100%', meta: '2 streams · 4K ready', badge: 'STREAMING',  color: 'blue'  },
+  { name: 'proxmox.homelab',  fill: '95%',  meta: 'Hypervisor platform',       badge: 'RUNNING',   color: 'green' },
+  { name: 'wazuh.siem',       fill: '90%',  meta: '3 monitored endpoints',      badge: 'ACTIVE',    color: 'green' },
+  { name: 'active.directory', fill: '100%', meta: 'Windows domain',             badge: 'HEALTHY',   color: 'green' },
+  { name: 'bookstack.docs',   fill: '100%', meta: 'Knowledge base',             badge: 'ONLINE',    color: 'blue'  },
+  { name: 'jellyfin.media',   fill: '100%', meta: 'Media server',               badge: 'ONLINE',    color: 'blue'  },
 ];
 ---
 
@@ -50,14 +52,14 @@ const statusRows: StatusRow[] = [
     <StatusPanel rows={statusRows} />
 
     <div class="hero__actions">
-      <a href="/projects"   class="btn btn--primary">View Projects</a>
+      <a href={`${BASE}#projects`} class="btn btn--primary">View Projects</a>
       <a
-        href="https://github.com/yourusername"
+        href="https://github.com/ramonhenriquez"
         class="btn btn--outline"
         target="_blank"
         rel="noopener noreferrer"
       >GitHub Profile</a>
-      <a href="/resume" class="btn btn--ghost">Download Resume</a>
+      <a href={`${BASE}resume/`} class="btn btn--ghost">View Resume</a>
     </div>
 
   </div>

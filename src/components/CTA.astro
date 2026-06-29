@@ -4,33 +4,20 @@
  * ─────────────────────────────────────────────────────────────────
  * Reusable call-to-action section block.
  *
- * Can be dropped at the bottom of any page with custom messaging
- * and action buttons.
- *
  * Props:
  *   title       — CTA heading
  *   description — supporting paragraph
  *   actions     — array of button config objects
- *
- * Button variants: "primary" | "outline" | "ghost"
- *
- * Example usage:
- *   <CTA
- *     title="Let's connect"
- *     description="Open to SOC analyst and infrastructure roles."
- *     actions={[
- *       { label: 'GitHub',    href: 'https://github.com/...', variant: 'primary', external: true },
- *       { label: 'Resume',   href: '/resume',               variant: 'outline' },
- *       { label: 'Email Me', href: 'mailto:you@example.com', variant: 'ghost'  },
- *     ]}
- *   />
+ *   headingId   — id for the h2 (avoids duplicate ids when used twice)
+ *   sectionId   — id on the <section> element, used for anchor links
+ *                 e.g. sectionId="contact" lets #contact nav link work
  */
 
 export interface CTAAction {
   label: string;
   href: string;
   variant: 'primary' | 'outline' | 'ghost';
-  /** Opens in a new tab and adds rel="noopener noreferrer" */
+  /** Opens in a new tab with rel="noopener noreferrer" */
   external?: boolean;
 }
 
@@ -38,8 +25,8 @@ interface Props {
   title: string;
   description: string;
   actions: CTAAction[];
-  /** Optional aria id suffix (avoids duplicate heading IDs on pages with multiple CTAs) */
   headingId?: string;
+  sectionId?: string;
 }
 
 const {
@@ -47,10 +34,11 @@ const {
   description,
   actions,
   headingId = 'cta-heading',
+  sectionId,
 } = Astro.props;
 ---
 
-<section class="cta-section" aria-labelledby={headingId}>
+<section class="cta-section" id={sectionId} aria-labelledby={headingId}>
   <div class="container">
     <div class="cta-card">
 
