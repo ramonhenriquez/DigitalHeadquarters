@@ -46,6 +46,9 @@
   /* — Motion — */
   --ease: cubic-bezier(0.16, 1, 0.3, 1);
   --dur:  180ms;
+
+  /* — Component-specific overrides — */
+  --nav-bg: rgba(13, 17, 23, 0.85);  /* overridden in light theme */
 }
 
 
@@ -111,7 +114,7 @@ img { max-width: 100%; display: block; }
   position: sticky;
   top: 0;
   z-index: 100;
-  background: rgba(13, 17, 23, 0.85);
+  background: var(--nav-bg);
   backdrop-filter: blur(16px);
   -webkit-backdrop-filter: blur(16px);
   border-bottom: 1px solid var(--border-sub);
@@ -1778,4 +1781,137 @@ img { max-width: 100%; display: block; }
   background: var(--amber-dim);
   color: var(--amber);
   border: 1px solid rgba(210, 153, 34, 0.18);
+}
+
+
+/* ----------------------------------------------------------------
+   23. THEME TOGGLE BUTTON
+   ---------------------------------------------------------------- */
+
+.theme-toggle {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 32px;
+  height: 32px;
+  border-radius: var(--r);
+  background: transparent;
+  border: 1px solid var(--border-sub);
+  color: var(--text-2);
+  cursor: pointer;
+  flex-shrink: 0;
+  padding: 0;
+  transition: color        var(--dur) var(--ease),
+              border-color var(--dur) var(--ease),
+              background   var(--dur) var(--ease);
+}
+
+.theme-toggle:hover {
+  color: var(--text-1);
+  border-color: var(--border);
+  background: var(--bg-1);
+}
+
+.theme-toggle:focus-visible {
+  outline: 2px solid var(--sky);
+  outline-offset: 2px;
+}
+
+.theme-toggle svg {
+  width: 16px;
+  height: 16px;
+  flex-shrink: 0;
+  pointer-events: none;
+}
+
+/* Icon visibility — toggled via data-theme on <html>.
+   Sun = shown in dark mode (click → go light).
+   Moon = shown in light mode (click → go dark).          */
+.icon-sun  { display: block; }
+.icon-moon { display: none;  }
+
+html[data-theme="light"] .icon-sun  { display: none;  }
+html[data-theme="light"] .icon-moon { display: block; }
+
+
+/* ----------------------------------------------------------------
+   24. LIGHT THEME
+   Applied when <html data-theme="light">.
+   Default (no attribute) = dark mode.
+   Only the variables that differ from dark mode are listed here.
+   ---------------------------------------------------------------- */
+
+html[data-theme="light"] {
+
+  /* Surfaces */
+  --bg:         #f6f8fa;
+  --bg-1:       #ffffff;
+  --bg-2:       #eef2f6;
+  --border:     #d0d7de;
+  --border-sub: #d8dee4;
+
+  /* Text */
+  --text-1: #24292f;
+  --text-2: #57606a;
+  --text-3: #6e7781;
+
+  /* Accent — GitHub blue in light mode reads better than the bright sky blue */
+  --cobalt:       #0969da;
+  --cobalt-hover: #0550ae;
+  --cobalt-dim:   rgba(9, 105, 218, 0.10);
+  --sky:          #0969da;
+  --sky-dim:      rgba(9, 105, 218, 0.08);
+
+  /* Status */
+  --signal:     #1a7f37;
+  --signal-dim: rgba(26, 127, 55, 0.10);
+  --amber:      #9a6700;
+  --amber-dim:  rgba(154, 103, 0, 0.10);
+
+  /* Nav */
+  --nav-bg: rgba(246, 248, 250, 0.92);
+}
+
+/* ── Selector overrides for hardcoded shadows/glows ─────────────
+   CSS variables handle color tokens automatically.
+   These overrides fix elements that use hardcoded rgba() shadows
+   that were tuned for a dark background.                          */
+
+html[data-theme="light"] .hero__glow {
+  background: radial-gradient(
+    ellipse at center,
+    rgba(9, 105, 218, 0.07) 0%,
+    transparent 65%
+  );
+}
+
+html[data-theme="light"] .status-panel {
+  box-shadow:
+    0 0 0 1px rgba(9, 105, 218, 0.10),
+    0 4px 24px rgba(0, 0, 0, 0.07),
+    0 0 60px rgba(9, 105, 218, 0.03);
+}
+
+html[data-theme="light"] .project-card:hover {
+  box-shadow: 0 4px 16px rgba(0, 0, 0, 0.09), 0 0 32px rgba(9, 105, 218, 0.04);
+}
+
+html[data-theme="light"] .cta-section::before {
+  background: radial-gradient(
+    ellipse at 50% 110%,
+    rgba(9, 105, 218, 0.05) 0%,
+    transparent 60%
+  );
+}
+
+html[data-theme="light"] .cta-card {
+  box-shadow: 0 0 40px rgba(9, 105, 218, 0.04);
+}
+
+html[data-theme="light"] .doc-card:hover {
+  box-shadow: 0 4px 14px rgba(0, 0, 0, 0.07);
+}
+
+html[data-theme="light"] .milestone__card:hover {
+  box-shadow: 0 4px 14px rgba(0, 0, 0, 0.07);
 }

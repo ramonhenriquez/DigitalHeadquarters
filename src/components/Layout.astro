@@ -3,13 +3,15 @@
  * Layout.astro
  * ─────────────────────────────────────────────────────────────────
  * The HTML shell that wraps every page on the site.
- * Handles <head> meta, global CSS, Navbar, Footer, and the <slot />
- * where page content is injected.
  *
- * Usage:
- *   <Layout title="Page Title" description="...">
- *     <!-- page content here -->
- *   </Layout>
+ * Theme flash prevention:
+ *   The first <script is:inline> in <head> reads localStorage and
+ *   sets data-theme="light" on <html> synchronously — before any
+ *   CSS or content renders — so there is no flash when a returning
+ *   user has a stored light-mode preference.
+ *
+ *   Dark mode is the default (no attribute). The script only acts
+ *   when the user previously chose light. No flash in dark mode.
  */
 
 import Navbar from './Navbar.astro';
@@ -39,6 +41,24 @@ const {
 <html lang="en">
   <head>
     <meta charset="UTF-8" />
+
+    <!--
+      THEME FLASH PREVENTION — must be the first script, before CSS.
+      Reads localStorage synchronously. Sets data-theme="light" if the
+      user previously chose light mode. Wrapped in try/catch for
+      environments where localStorage is unavailable (e.g. private browsing).
+    -->
+    <script is:inline>
+      (function () {
+        try {
+          var stored = localStorage.getItem('theme');
+          if (stored === 'light') {
+            document.documentElement.setAttribute('data-theme', 'light');
+          }
+        } catch (e) {}
+      })();
+    </script>
+
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <meta name="description" content={description} />
 
@@ -48,9 +68,9 @@ const {
     <meta property="og:description" content={ogDescription ?? description} />
     <meta property="og:site_name"   content="Ramon Henriquez" />
 
-    <!-- Theme -->
+    <!-- Both themes are supported -->
     <meta name="theme-color" content="#0d1117" />
-    <meta name="color-scheme" content="dark" />
+    <meta name="color-scheme" content="dark light" />
 
     <title>{title}</title>
 

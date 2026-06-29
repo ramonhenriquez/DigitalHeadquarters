@@ -8,10 +8,8 @@
  * correctly on both localhost and GitHub Pages subdirectory deploys.
  *
  * Active page detection:
- *   - Anchor links (#section) are never marked active — they
- *     are homepage anchors, not standalone pages.
- *   - Real page routes (/documentation/, /resume/) are marked
- *     active when pathname matches.
+ *   - Anchor links (#section) are never marked active.
+ *   - Real page routes are marked active when pathname matches.
  *
  * To promote an anchor link to a real page:
  *   Change: href: `${BASE}#pagename`
@@ -19,19 +17,17 @@
  *   Then create src/pages/pagename.astro
  */
 
+import ThemeToggle from './ThemeToggle.astro';
+
 const BASE = import.meta.env.BASE_URL;
 const { pathname } = Astro.url;
 
-// Returns true when a nav link should be marked aria-current="page".
-// Anchor links (#section) are never active — they live on the homepage.
-// Real routes are active when the current pathname includes the route segment.
 function isActivePage(href: string): boolean {
   if (href.includes('#')) return false;
   const routeSegment = href.replace(BASE, '').replace(/\//g, '');
   return routeSegment.length > 0 && pathname.includes(routeSegment);
 }
 
-// Update href from `${BASE}#pagename` → `${BASE}pagename/` as each page is built.
 // Documentation is now a real page. Infrastructure, Projects, Contact are still anchors.
 const navLinks = [
   { label: 'Infrastructure', href: `${BASE}#infrastructure`  },
@@ -52,8 +48,9 @@ const navLinks = [
       <span class="nav__status-dot" title="All systems operational" aria-hidden="true"></span>
     </a>
 
-    <!-- Links -->
+    <!-- Links + controls -->
     <ul class="nav__links" role="list">
+
       {navLinks.map(link => (
         <li class="nav__hide-mobile">
           <a
@@ -64,6 +61,11 @@ const navLinks = [
           </a>
         </li>
       ))}
+
+      <!-- Theme toggle -->
+      <li>
+        <ThemeToggle />
+      </li>
 
       <!-- Resume — always visible -->
       <li>
@@ -76,7 +78,7 @@ const navLinks = [
           Resume
         </a>
       </li>
-    </ul>
 
+    </ul>
   </div>
 </nav>
