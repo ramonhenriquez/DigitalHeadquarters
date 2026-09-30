@@ -1,0 +1,99 @@
+/* ================================================================
+   TOKENS — Digital Headquarters
+   Concept: the patch panel. Cable colour encodes the layer a thing
+   belongs to, the way colour-coded patch cables do in a real rack.
+   Cable colours are reserved for layers; --accent is the only
+   interface colour (links, focus, primary buttons).
+   ================================================================ */
+:root {
+  /* Surfaces: deep slate console, not black */
+  --bg:        #121a24;
+  --bg-raised: #18222f;
+  --bg-inset:  #0e151e;
+  --bg-hover:  #1f2b3a;
+  --line:      #2d3b4d;
+  --line-soft: #212d3b;
+
+  /* Text */
+  --text-1: #e7edf5;
+  --text-2: #a6b3c3;
+  --text-3: #8795a7;
+
+  /* Interface accent */
+  --accent:        #6cb4ff;
+  --accent-strong: #1f6ad0;
+  --accent-ink:    #ffffff;
+  --accent-soft:   rgba(108, 180, 255, 0.12);
+
+  /* Cable colours, one per layer */
+  --cable-physical:       #9aa8b8;
+  --cable-network:        #4f9dff;
+  --cable-virtualization: #e8b04a;
+  --cable-security:       #f06a5f;
+  --cable-identity:       #b28dff;
+  --cable-services:       #3fcf8e;
+
+  /* Drafting grid behind the map */
+  --grid: rgba(130, 160, 200, 0.075);
+
+  /* Type */
+  --font-body:    'Barlow', system-ui, -apple-system, 'Segoe UI', sans-serif;
+  --font-display: 'Barlow Semi Condensed', 'Barlow', system-ui, sans-serif;
+  --font-mono:    'JetBrains Mono', ui-monospace, 'SFMono-Regular', Consolas, monospace;
+
+  /* Scale (1.25) */
+  --step--1: 0.8125rem;
+  --step-0:  1.0625rem;
+  --step-1:  1.3125rem;
+  --step-2:  1.625rem;
+  --step-3:  2.0625rem;
+  --step-4:  clamp(1.875rem, 1.35rem + 2.8vw, 3.5rem);
+
+  /* Radii follow hierarchy: chips < plates < panels */
+  --r-chip:  3px;
+  --r-plate: 6px;
+  --r-panel: 10px;
+
+  --ease: cubic-bezier(0.2, 0.8, 0.2, 1);
+  --dur:  160ms;
+
+  --nav-h: 60px;
+  --nav-bg: rgba(18, 26, 36, 0.86);
+  color-scheme: dark;
+}
+
+html[data-theme='light'] {
+  --bg:        #eef2f6;
+  --bg-raised: #ffffff;
+  --bg-inset:  #e3e9f0;
+  --bg-hover:  #e7edf4;
+  --line:      #c3cedb;
+  --line-soft: #d7dfe8;
+
+  --text-1: #142030;
+  --text-2: #43546a;
+  --text-3: #56677c;
+
+  --accent:        #1c62c4;
+  --accent-strong: #1c62c4;
+  --accent-soft:   rgba(28, 98, 196, 0.1);
+
+  --cable-physical:       #5d6b7c;
+  --cable-network:        #1f6fd6;
+  --cable-virtualization: #8a5a00;
+  --cable-security:       #c43a2f;
+  --cable-identity:       #7447d1;
+  --cable-services:       #0d8052;
+
+  --grid: rgba(20, 60, 110, 0.07);
+  --nav-bg: rgba(238, 242, 246, 0.88);
+  color-scheme: light;
+}
+
+/* Layer helper: any element with data-layer gets --cable */
+[data-layer='physical']       { --cable: var(--cable-physical); }
+[data-layer='network']        { --cable: var(--cable-network); }
+[data-layer='virtualization'] { --cable: var(--cable-virtualization); }
+[data-layer='security']       { --cable: var(--cable-security); }
+[data-layer='identity']       { --cable: var(--cable-identity); }
+[data-layer='services']       { --cable: var(--cable-services); }

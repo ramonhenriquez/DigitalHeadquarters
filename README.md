@@ -1,161 +1,127 @@
 # Digital Headquarters
 
-Personal professional website for Ramon Henriquez — Systems Technician II, Homelab Engineer, and aspiring SOC Analyst.
+Personal site for Ramon Henriquez, Systems Technician II building toward security operations work.
 
-This is not a generic portfolio template. It exists to document real infrastructure work, showcase homelab projects, and build a public record of continuous learning in IT and cybersecurity.
+The site is an **infrastructure explorer**: an interactive map of the homelab where every component links to the case study and the technical documentation behind it. Its technical content is sourced from **[Homelab-Portfolio](https://github.com/ramonhenriquez/Homelab-Portfolio)**, which stays the technical source of truth; this repository holds the presentation.
 
----
+What is automatic and what isn't:
 
-## Why This Exists
+- **Automatic:** every Markdown document in Homelab-Portfolio is synced at build time, pinned to the commit it came from, and rendered under `/docs/` with a link to the same file on GitHub.
+- **Written by hand, from those documents:** the case studies (`src/data/projects.ts`), the infrastructure map (`src/data/infrastructure.ts`), skills and evidence (`src/data/skills.ts`) and the timeline (`src/data/timeline.ts`). Every fact in them cites a Homelab-Portfolio file, and the build fails if a cited file no longer exists. When Homelab-Portfolio gains new material, these files need updating to reflect it.
 
-Most IT professionals have a resume. This site exists to show *how I think and work* — not just where I've worked.
+Live: https://ramonhenriquez.github.io/DigitalHeadquarters/
 
-A hiring manager visiting this site should be able to understand:
+## Content rules
 
-- What I build and why
-- How I document my work
-- What I am currently learning
-- Why hands-on lab experience translates to real-world value on an IT or security team
+- Nothing is invented. Every fact about the lab cites a file in Homelab-Portfolio.
+- If the documentation doesn't cover something, the page says **Not yet documented** instead of filling the gap. Open gaps are tracked in [`docs/CONTENT_GAPS.md`](docs/CONTENT_GAPS.md).
+- Nothing on the site is live monitoring. Status labels describe documented state: **DEPLOYED**, **ACTIVE PROJECT**, **EXPERIMENTAL**, **PLANNED**.
+- Skills are rated by their strongest evidence: validated by test → step-by-step documented → documented in architecture → mentioned only.
 
----
+## Projects: featured case studies and lab systems
 
-## Tech Stack
+Each project in `src/data/projects.ts` has a `tier`:
 
-| Layer | Technology |
+- `featured` — the source docs cover objective, implementation, validation and results. The build enforces this.
+- `lab` — documented and running, but not deep enough for a full case study yet. Empty sections are grouped under "Still being documented" rather than padded.
+
+Every section is labelled Documented, Partially documented or Not yet documented. The label is derived from the data (items present, and whether a `missing` note is set), never typed in.
+
+## Contact details and certifications
+
+`src/data/site.ts` holds `PUBLIC_CONTACT` (used everywhere: email, LinkedIn, GitHub), `RESUME_CONTACT` (used only on `/resume/`; set `phone: null` to hide the number) and `CERTIFICATIONS` (with an explicit status). `public/resume.pdf` is a separate file with its own contact line.
+
+## Running it
+
+```bash
+npm ci
+npm run dev        # syncs Homelab-Portfolio, then starts the dev server
+npm run build      # syncs, then builds to dist/
+npm run preview
+npm run check      # type-check Astro and TypeScript
+```
+
+`npm run sync` clones Homelab-Portfolio into `.homelab-source/` (git-ignored) and records the commit and each file's last-changed date. Options:
+
+| Variable | Effect |
 |---|---|
-| Framework | [Astro](https://astro.build/) — static site generator |
-| Hosting | [GitHub Pages](https://pages.github.com/) |
-| Styling | Custom CSS — no frameworks |
-| Fonts | Inter + JetBrains Mono (Google Fonts) |
-| Language | HTML, CSS, Astro components |
+| `HOMELAB_PORTFOLIO_PATH=../Homelab-Portfolio` | Use a local checkout instead of cloning (handy while writing docs) |
+| `HOMELAB_PORTFOLIO_REPO=<git url>` | Clone a different repository |
+| `HOMELAB_PORTFOLIO_REF=<branch or tag>` | Build from a branch or tag other than `main` |
+| `HOMELAB_OFFLINE=1` | Skip fetching and reuse the last sync |
 
-No JavaScript frameworks. No unnecessary dependencies. Fast, static, and maintainable.
+The build fails if any page cites a Homelab-Portfolio file that no longer exists, so a renamed document can't silently break links.
 
----
+If the clone fails:
 
-## Pages
+- **In CI** (`CI=true`, as on GitHub Actions) the build fails. GitHub Pages keeps serving the last successful deploy, so a GitHub outage can't publish stale or empty content.
+- **Locally** the previous sync is reused, marked `reused` in `.homelab-source/_sync.json`, and the footer says the build is offline.
 
-| Page | Status | Description |
-|---|---|---|
-| Home | ✅ Live | Infrastructure overview, projects, tech stack, learning journey |
-| Resume | ✅ Live | Online resume with PDF download |
-| Documentation | ✅ Live | Documentation philosophy and areas |
-| Infrastructure | 🔲 Planned | Detailed homelab architecture and service overview |
-| Projects | 🔲 Planned | Individual project pages with write-ups |
-| Contact | 🔲 Planned | Contact information and availability |
-
----
-
-## Running Locally
-
-**Requirements:** Node.js 18 or higher, npm
-
-```bash
-# Clone the repository
-git clone https://github.com/ramonhenriquez/DigitalHeadquarters.git
-cd DigitalHeadquarters
-
-# Install dependencies
-npm install
-
-# Start the development server
-npm run dev
-```
-
-Open [http://localhost:4321](http://localhost:4321) in your browser.
-
-Other commands:
-
-```bash
-npm run build    # Build for production (outputs to ./dist)
-npm run preview  # Preview the production build locally
-```
-
----
+A local checkout (`HOMELAB_PORTFOLIO_PATH`) with uncommitted Markdown changes is marked `dirty`, and the footer says so, because the GitHub links (pinned to the checkout's HEAD) won't match what was rendered.
 
 ## Deployment
 
-This site deploys automatically to GitHub Pages on every push to `main`.
+GitHub Actions ([`.github/workflows/deploy.yml`](.github/workflows/deploy.yml)) builds and deploys to GitHub Pages on push to `main`, on manual dispatch, and daily at 06:00 UTC, so new Homelab-Portfolio documents appear within a day without touching this repo.
 
-**How it works:**
+### Rebuild when Homelab-Portfolio changes (optional, instant)
 
-1. Push to `main`
-2. GitHub Actions runs `astro build`
-3. Built files are deployed to GitHub Pages
-4. Site is live at the configured GitHub Pages URL
+Add this workflow to **Homelab-Portfolio** as `.github/workflows/notify-site.yml`, and a repository secret `SITE_DISPATCH_TOKEN` holding a fine-grained token with *Contents: read and write* on DigitalHeadquarters:
 
-**Key configuration files:**
-
-- `astro.config.mjs` — sets `site` and `base` for GitHub Pages subdirectory deployment
-- `public/` — static assets served as-is (resume PDF, images)
-- `.github/workflows/` — GitHub Actions deploy workflow
-
-If deploying to a custom domain, update `site` in `astro.config.mjs` and add a `CNAME` file to `public/`.
-
----
-
-## Project Structure
-
-```
-src/
-├── components/       # Reusable Astro components
-│   ├── Layout.astro       # HTML shell — wraps every page
-│   ├── Navbar.astro       # Sticky top navigation
-│   ├── Footer.astro       # Site footer
-│   ├── Hero.astro         # Homepage hero + status panel
-│   ├── StatusPanel.astro  # Infrastructure status HUD
-│   ├── ProjectCard.astro  # Project card component
-│   ├── TechStack.astro    # Skills grid
-│   ├── LearningJourney.astro  # Timeline component
-│   └── CTA.astro          # Call-to-action block
-├── pages/            # One file = one page/route
-│   ├── index.astro        # Homepage
-│   ├── resume.astro       # Online resume
-│   └── documentation.astro  # Documentation showcase
-└── styles/
-    └── portfolio.css      # Complete design system
-public/
-    └── resume.pdf         # Downloadable resume PDF
+```yaml
+name: Rebuild portfolio site
+on:
+  push:
+    branches: [main]
+jobs:
+  dispatch:
+    runs-on: ubuntu-latest
+    steps:
+      - run: |
+          curl -sf -X POST \
+            -H "Authorization: Bearer ${{ secrets.SITE_DISPATCH_TOKEN }}" \
+            -H "Accept: application/vnd.github+json" \
+            https://api.github.com/repos/ramonhenriquez/DigitalHeadquarters/dispatches \
+            -d '{"event_type":"homelab-updated"}'
 ```
 
----
+## Structure
 
-## Content Standards
+```
+scripts/sync-homelab.mjs        Pulls Homelab-Portfolio in at build time
+src/content.config.ts           "homelabDocs" collection over .homelab-source/
+src/data/                       The sourced data model (edit these to change content)
+  site.ts                       Name, title, contact links, navigation
+  status.ts                     Layers (cable colours), status and evidence vocabularies
+  source-paths.ts               Short names for Homelab-Portfolio files
+  infrastructure.ts             Components, facts, gaps, and the six architecture views
+  projects.ts                   Case studies, section by section, each item cited
+  skills.ts                     Skills and the evidence behind each
+  timeline.ts                   Milestones, with where each date comes from
+src/lib/                        Sources/links, validation, map geometry, search index
+src/components/
+  layout/                       Layout, Navbar, Footer, ThemeToggle, CommandPalette
+  topology/                     TopologyExplorer, TopologyBoard (SVG), NodeDetail
+  projects/                     ProjectRow, CaseStudySection, AlertRecord
+  timeline/                     Timeline
+  ui/                           StatusBadge, EvidenceBadge, SourceRefs, NotDocumented, CTA
+src/scripts/                    Explorer and command-palette behaviour
+src/styles/                     tokens → base → components → topology → pages
+src/pages/                      Routes (see below)
+docs/                           REDESIGN.md, CONTENT_GAPS.md, SOURCE_FORMAT.md
+```
 
-This site follows strict accuracy standards:
+Routes: `/`, `/infrastructure/` (supports `?view=` and `?node=`), `/projects/`, `/projects/<slug>/`, `/skills/`, `/skills/<slug>/`, `/timeline/`, `/docs/`, `/docs/<path>/`, `/resume/`, `/contact/`. `/documentation/` redirects to `/docs/`.
 
-- Only technologies actually in use are listed as skills
-- No fabricated metrics or statistics
-- Roadmap items are labeled "Planned" — not presented as completed
-- Every claim must be something I can explain confidently in an interview
+## Adding things
 
----
+- **A new document in Homelab-Portfolio** appears under `/docs/` on the next build with no changes here. Optional frontmatter (title, summary, date, status) is described in [`docs/SOURCE_FORMAT.md`](docs/SOURCE_FORMAT.md).
+- **A new project**: add the file to `src/data/source-paths.ts`, an entry to `src/data/projects.ts` with `tier: 'lab'` (cite every item; use `missing` for gaps), and map its folder in `FOLDER_TO_PROJECT` in `src/lib/sources.ts`. Promote it to `featured` once its docs cover the core sections.
+- **A roadmap of what to document next** is in [`docs/CONTENT_GAPS.md`](docs/CONTENT_GAPS.md).
+- **A new component on the map**: add it to `NODES` and place it in one or more `VIEWS` in `src/data/infrastructure.ts`.
+- **A new skill**: add it to `src/data/skills.ts` with at least one evidence row.
 
-## Project Status
+More detail, including the design rationale, is in [`docs/REDESIGN.md`](docs/REDESIGN.md).
 
-**Active** — updated as projects are completed and documented.
+## Accessibility
 
-Current priorities:
-- Completing CompTIA Security+ certification
-- Expanding Wazuh + Suricata documentation
-- Building the Infrastructure and Projects pages
-
----
-
-## Roadmap
-
-**Pages to build:**
-- Infrastructure — homelab architecture and service overview
-- Projects — individual write-ups for each project
-- Contact — professional contact information
-
-**Technologies to document when deployed:**
-- pfSense
-- Docker
-- Pi-hole
-- Tailscale
-- Uptime Kuma
-
----
-
-*Built and maintained by [Ramon Henriquez](https://github.com/ramonhenriquez)*
+Keyboard-operable explorer (tabs pattern, Enter to open a component, Escape to close), a list view that's the default on small screens and the fallback without JavaScript, a skip link, visible focus, reduced-motion support, and status shown by shape and text as well as colour. Checked with axe-core in both themes; the one remaining finding is a heading-level skip inside a Homelab-Portfolio document (see CONTENT_GAPS.md §3).

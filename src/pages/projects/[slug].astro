@@ -1,0 +1,237 @@
+---
+/**
+ * Project page, rendered from src/data/projects.ts (which cites
+ * Homelab-Portfolio item by item). Section order is fixed:
+ * Objective → Architecture → Implementation → Troubleshooting & investigation
+ * → Validation → Results → Skills → What I learned → Source documentation.
+ *
+ * Featured case studies show every section, each labelled with its coverage.
+ * Lab systems show the sections their docs cover, and group the rest into a
+ * single "still being documented" section rather than a row of empty ones.
+ */
+import Layout from '../../components/layout/Layout.astro';
+import CaseStudySection from '../../components/projects/CaseStudySection.astro';
+import CoverageSummary from '../../components/projects/CoverageSummary.astro';
+import AlertRecord from '../../components/projects/AlertRecord.astro';
+import TopologyBoard from '../../components/topology/TopologyBoard.astro';
+import StatusBadge from '../../components/ui/StatusBadge.astro';
+import EvidenceBadge from '../../components/ui/EvidenceBadge.astro';
+import CoverageBadge from '../../components/ui/CoverageBadge.astro';
+import NotDocumented from '../../components/ui/NotDocumented.astro';
+import {
+  PROJECTS, FEATURED, LAB, CASE_STUDY_SECTIONS, sectionCoverage,
+  type Project, type Section, type SectionKey,
+} from '../../data/projects';
+import { viewById } from '../../data/infrastructure';
+import { skillBySlug, skillStrength } from '../../data/skills';
+import { EVIDENCE, layerById } from '../../data/status';
+import { getDocs } from '../../lib/sources';
+
+export function getStaticPaths() {
+  // Prev/next stay within a tier, so featured case studies lead to each other.
+  return PROJECTS.map((project) => {
+    const group = project.tier === 'featured' ? FEATURED : LAB;
+    const i = group.indexOf(project);
+    return { params: { slug: project.slug }, props: { project, prev: group[i - 1] ?? null, next: group[i + 1] ?? null } };
+  });
+}
+
+interface Props { project: Project; prev: Project | null; next: Project | null }
+const { project: p, prev, next } = Astro.props;
+const BASE = import.meta.env.BASE_URL;
+const layer = layerById[p.layer];
+const view = viewById[p.view];
+const featured = p.tier === 'featured';
+
+const allDocs = await getDocs();
+const docs = p.docs.map((path) => allDocs.find((d) => d.sourcePath === path)).filter((d) => !!d);
+const skills = p.skills.map((s) => skillBySlug[s]).filter(Boolean);
+
+const sectionData: Record<SectionKey, Section> = {
+  objective: p.objective,
+  architecture: p.architecture,
+  implementation: p.implementation,
+  challenges: p.challenges,
+  validation: p.validation,
+  result: p.result,
+  learned: p.learned,
+};
+const isWritten = (k: string): k is SectionKey => k in sectionData;
+const anchor = (key: string) => `cs-${key}`;
+const num = (key: string) => CASE_STUDY_SECTIONS.findIndex((s) => s.key === key) + 1;
+
+// Lab systems: empty sections are grouped at the end instead of shown one by one.
+const pending = featured ? [] : CASE_STUDY_SECTIONS.filter((s) => isWritten(s.key) && sectionCoverage(sectionData[s.key as SectionKey]) === 'none');
+const pendingKeys = new Set(pending.map((s) => s.key));
+const shown = CASE_STUDY_SECTIONS.filter((s) => !pendingKeys.has(s.key));
+const kindLabel = featured ? 'Case study' : 'Lab system';
+const listLabel = featured ? 'Case studies' : 'Lab systems';
+---
+
+<Layout title={p.title} description={p.summary}>
+  <header class="cs-hero" data-layer={p.layer}>
+    <div class="container">
+      <p class="cs-hero__crumb"><a href={`${BASE}projects/`}>Projects</a> <span aria-hidden="true">/</span> {listLabel}</p>
+      <p class="cs-hero__layer">{featured ? 'Featured case study' : 'Lab system'} · {layer.label}</p>
+      <h1>{p.title}</h1>
+      <p class="cs-hero__summary">{p.summary}</p>
+      <div class="cs-hero__meta">
+        <StatusBadge status={p.status} />
+        <EvidenceBadge level={p.evidence} />
+        <span class="small muted">Demonstrates: {p.proves}</span>
+      </div>
+      {!featured && (
+        <p class="cs-hero__note">Technical documentation for this system is still being expanded. This page shows what Homelab-Portfolio covers today.</p>
+      )}
+    </div>
+  </header>
+
+  <div class="container cs-layout" data-layer={p.layer}>
+    <nav class="cs-rail" aria-label={`${kindLabel} sections`}>
+      <p class="cs-rail__title">On this page</p>
+      <ol data-rail>
+        {shown.map((s) => (
+          <li>
+            <a href={`#${anchor(s.key)}`}>
+              <span aria-hidden="true">{String(num(s.key)).padStart(2, '0')}</span>
+              <span class="cs-rail__label">{s.key === 'skills' && !featured ? 'Related skills' : s.title}</span>
+              {isWritten(s.key) && <CoverageBadge coverage={sectionCoverage(sectionData[s.key])} compact />}
+            </a>
+          </li>
+        ))}
+        {pending.length > 0 && (
+          <li><a href="#cs-pending"><span aria-hidden="true">··</span><span class="cs-rail__label">Still being documented</span></a></li>
+        )}
+      </ol>
+      <div class="cs-rail__more">
+        <a href={`${BASE}infrastructure/?view=${p.view}&node=${p.focus[0]}`}>See it on the map</a>
+        {docs[0] && <a href={docs[0].github}>Source on GitHub</a>}
+      </div>
+    </nav>
+
+    <article aria-labelledby="cs-title-hidden">
+      <h2 class="visually-hidden" id="cs-title-hidden">{p.title}, {kindLabel.toLowerCase()}</h2>
+
+      <CoverageSummary project={p} />
+
+      {shown.map((s) => {
+        const id = anchor(s.key);
+        const n = num(s.key);
+        if (s.key === 'skills') {
+          return (
+            <section class="cs-section" id={id} aria-labelledby={`${id}-h`}>
+              <div class="cs-section__head">
+                <h2 class="cs-section__title" id={`${id}-h`}><span class="cs-section__num" aria-hidden="true">{String(n).padStart(2, '0')}</span>{featured ? s.title : 'Related skills'}</h2>
+              </div>
+              <div class="cs-section__body">
+                <p class="muted" style="margin-bottom:14px">Each skill page traces the evidence behind it to the project and the source document.</p>
+                <ul class="skill-links" role="list">
+                  {skills.map((sk) => (
+                    <li data-layer={sk.layer}>
+                      <a href={`${BASE}skills/${sk.slug}/`}>
+                        <span class="skill-links__name">{sk.name}</span>
+                        <span class="small muted">Strongest evidence: {EVIDENCE[skillStrength(sk)].label.toLowerCase()}</span>
+                      </a>
+                    </li>
+                  ))}
+                </ul>
+              </div>
+            </section>
+          );
+        }
+        if (s.key === 'docs') {
+          return (
+            <section class="cs-section" id={id} aria-labelledby={`${id}-h`}>
+              <div class="cs-section__head">
+                <h2 class="cs-section__title" id={`${id}-h`}><span class="cs-section__num" aria-hidden="true">{String(n).padStart(2, '0')}</span>{s.title}</h2>
+              </div>
+              <div class="cs-section__body">
+                <p class="muted" style="margin-bottom:14px">The evidence behind this page. Everything above is summarised from these documents in Homelab-Portfolio; the GitHub links are pinned to the commit this site was built from.</p>
+                {docs.length > 0 ? (
+                  <div class="table-scroll">
+                    <table class="doc-table">
+                      <thead><tr><th scope="col">Document</th><th scope="col">On GitHub</th><th scope="col">Last changed</th></tr></thead>
+                      <tbody>
+                        {docs.map((d) => (
+                          <tr>
+                            <td><a href={d.href}>{d.title}</a></td>
+                            <td><a href={d.github}><code>{d.sourcePath}</code></a></td>
+                            <td>{d.updated ?? <span class="muted">unknown</span>}</td>
+                          </tr>
+                        ))}
+                      </tbody>
+                    </table>
+                  </div>
+                ) : (
+                  <NotDocumented text="No documents are linked to this project yet." />
+                )}
+              </div>
+            </section>
+          );
+        }
+        const key = s.key as SectionKey;
+        return (
+          <CaseStudySection id={id} number={n} title={s.title} section={sectionData[key]} steps={key === 'implementation' || key === 'validation'}>
+            {key === 'architecture' && view && (
+              <figure style="margin-top:20px">
+                <div class="board-frame">
+                  <TopologyBoard view={view} mode="static" focus={p.focus} idPrefix={`cs-${p.slug}`} />
+                </div>
+                <figcaption class="board-frame__caption">
+                  The {layerById[p.view].label.toLowerCase()} view, with this project's components highlighted. Select a component to open it in the <a href={`${BASE}infrastructure/?view=${p.view}`}>explorer</a>.
+                </figcaption>
+              </figure>
+            )}
+            {key === 'challenges' && p.slug === 'wazuh-suricata' && (
+              <div style="margin-top:24px"><AlertRecord headingLevel="h3" /></div>
+            )}
+          </CaseStudySection>
+        );
+      })}
+
+      {pending.length > 0 && (
+        <section class="cs-section cs-pending" id="cs-pending" aria-labelledby="cs-pending-h">
+          <div class="cs-section__head">
+            <h2 class="cs-section__title" id="cs-pending-h">Still being documented</h2>
+            <CoverageBadge coverage="none" />
+          </div>
+          <div class="cs-section__body">
+            <p class="muted">Additional implementation documentation is in progress. Homelab-Portfolio doesn't cover these parts of the build yet, so they're not described here:</p>
+            <dl class="cs-pending__list">
+              {pending.map((s) => (
+                <div id={anchor(s.key)}>
+                  <dt>{s.title}</dt>
+                  <dd>{sectionData[s.key as SectionKey].missing ?? 'Not yet documented.'}</dd>
+                </div>
+              ))}
+            </dl>
+            <p class="small muted" style="margin-top:12px">What would fill these gaps is tracked in the site's <a href="https://github.com/ramonhenriquez/DigitalHeadquarters/blob/main/docs/CONTENT_GAPS.md">content-gaps roadmap</a>.</p>
+          </div>
+        </section>
+      )}
+
+      <nav class="cs-next" aria-label={`More ${listLabel.toLowerCase()}`}>
+        {prev ? <a href={`${BASE}projects/${prev.slug}/`}><span>Previous {kindLabel.toLowerCase()}</span><strong>{prev.title}</strong></a> : <span />}
+        {next ? <a href={`${BASE}projects/${next.slug}/`}><span>Next {kindLabel.toLowerCase()}</span><strong>{next.title}</strong></a> : <span />}
+      </nav>
+    </article>
+  </div>
+</Layout>
+
+<script>
+  // Mark the rail link for the section currently in view.
+  const links = [...document.querySelectorAll<HTMLAnchorElement>('[data-rail] a')];
+  const targets = links.map((a) => document.querySelector<HTMLElement>(a.hash)).filter((el): el is HTMLElement => !!el);
+  if ('IntersectionObserver' in window && targets.length) {
+    const visible = new Set<string>();
+    const io = new IntersectionObserver(
+      (entries) => {
+        entries.forEach((e) => (e.isIntersecting ? visible.add(e.target.id) : visible.delete(e.target.id)));
+        const first = targets.find((t) => visible.has(t.id));
+        if (first) links.forEach((a) => a.setAttribute('aria-current', String(a.hash === `#${first.id}`)));
+      },
+      { rootMargin: '-20% 0px -60% 0px' },
+    );
+    targets.forEach((t) => io.observe(t));
+  }
+</script>

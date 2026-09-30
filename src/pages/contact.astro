@@ -1,0 +1,33 @@
+---
+import Layout from '../components/layout/Layout.astro';
+import { SITE, PUBLIC_CONTACT } from '../data/site';
+
+const BASE = import.meta.env.BASE_URL;
+---
+
+<Layout title="Contact" description={`Contact ${SITE.name}: email, LinkedIn and GitHub.`}>
+  <header class="page-head">
+    <div class="container">
+      <h1>Contact</h1>
+      <p>
+        I'm a {SITE.title} in {PUBLIC_CONTACT.location}, {SITE.focus.charAt(0).toLowerCase() + SITE.focus.slice(1)}.
+        Email is the fastest way to reach me.
+      </p>
+    </div>
+  </header>
+
+  <section class="band" style="padding-top:32px" aria-label="Ways to reach me">
+    <div class="container">
+      <div class="contact-grid">
+        <a class="contact-card" href={`mailto:${PUBLIC_CONTACT.email}`}><span>Email</span><strong>{PUBLIC_CONTACT.email}</strong></a>
+        <a class="contact-card" href={PUBLIC_CONTACT.linkedin}><span>LinkedIn</span><strong>Ramon Henriquez</strong></a>
+        <a class="contact-card" href={PUBLIC_CONTACT.github}><span>GitHub</span><strong>@{PUBLIC_CONTACT.githubHandle}</strong></a>
+        <a class="contact-card" href={`${BASE}resume/`}><span>Resume</span><strong>View online or download PDF</strong></a>
+      </div>
+      <p class="muted" style="margin-top:28px;max-width:64ch">
+        Want to verify something you read here? Every case study links to the document it came from, and every
+        document links to its file in <a href={SITE.sourceRepo}>Homelab-Portfolio</a> on GitHub.
+      </p>
+    </div>
+  </section>
+</Layout>

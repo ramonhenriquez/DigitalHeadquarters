@@ -1,9 +1,23 @@
 name: Deploy to GitHub Pages
 
+# Technical documentation is synchronized from ramonhenriquez/Homelab-Portfolio
+# at build time (scripts/sync-homelab.mjs runs as the npm "prebuild" step) and
+# rendered under /docs/. Case studies, infrastructure, skills and timeline data
+# are curated from those documents in src/data/. The site is rebuilt when
+# Homelab-Portfolio changes, not only when this repository does, so /docs/
+# stays current.
 on:
   push:
     branches: [main]
+  # Manual rebuild from the Actions tab
   workflow_dispatch:
+  # Daily rebuild picks up new Homelab-Portfolio docs automatically (06:00 UTC)
+  schedule:
+    - cron: '0 6 * * *'
+  # Instant rebuild: Homelab-Portfolio can send this event on push.
+  # See README.md → "Rebuild when Homelab-Portfolio changes".
+  repository_dispatch:
+    types: [homelab-updated]
 
 permissions:
   contents: read
@@ -21,6 +35,8 @@ jobs:
     steps:
       - uses: actions/checkout@v6
 
+      # Builds with `npm run build`; the prebuild hook clones Homelab-Portfolio
+      # and the build fails if any page cites a document that no longer exists.
       - uses: withastro/action@v6
 
   deploy:

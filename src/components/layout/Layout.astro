@@ -1,0 +1,84 @@
+---
+/**
+ * Layout.astro — the shell around every page.
+ *
+ * Head script (runs before paint):
+ *   - swaps `no-js` → `js` so components can progressively enhance
+ *   - applies the stored theme, or the OS preference on a first visit
+ *
+ * Also runs build-time content validation once per build: a broken
+ * reference to Homelab-Portfolio fails the build instead of shipping.
+ */
+import Navbar from './Navbar.astro';
+import Footer from './Footer.astro';
+import CommandPalette from './CommandPalette.astro';
+import { validateSources } from '../../lib/validate';
+import { SITE } from '../../data/site';
+import '../../styles/tokens.css';
+import '../../styles/base.css';
+import '../../styles/components.css';
+import '../../styles/topology.css';
+import '../../styles/pages.css';
+
+interface Props {
+  title: string;
+  description?: string;
+}
+
+await validateSources();
+
+const {
+  title,
+  description = `${SITE.name}: ${SITE.title} building and documenting a Proxmox homelab with Active Directory, Wazuh SIEM and Suricata IDS.`,
+} = Astro.props;
+
+const canonical = new URL(Astro.url.pathname, Astro.site);
+const fullTitle = title === SITE.name ? `${SITE.name}, ${SITE.title}` : `${title} | ${SITE.name}`;
+---
+
+<!doctype html>
+<html lang="en" class="no-js">
+  <head>
+    <meta charset="UTF-8" />
+    <script is:inline>
+      (function () {
+        var d = document.documentElement;
+        d.classList.remove('no-js');
+        d.classList.add('js');
+        try {
+          var s = localStorage.getItem('theme');
+          if (s === 'light' || (!s && window.matchMedia('(prefers-color-scheme: light)').matches)) {
+            d.setAttribute('data-theme', 'light');
+          }
+        } catch (e) {}
+      })();
+    </script>
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>{fullTitle}</title>
+    <meta name="description" content={description} />
+    <link rel="canonical" href={canonical} />
+    <meta property="og:type" content="website" />
+    <meta property="og:title" content={fullTitle} />
+    <meta property="og:description" content={description} />
+    <meta property="og:url" content={canonical} />
+    <meta property="og:site_name" content={SITE.name} />
+    <meta name="theme-color" content="#121a24" media="(prefers-color-scheme: dark)" />
+    <meta name="theme-color" content="#eef2f6" media="(prefers-color-scheme: light)" />
+    <link rel="icon" type="image/svg+xml" href={`${import.meta.env.BASE_URL}favicon.svg`} />
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link
+      rel="stylesheet"
+      href="https://fonts.googleapis.com/css2?family=Barlow:wght@400;500;600&family=Barlow+Semi+Condensed:wght@600;700&family=JetBrains+Mono:wght@400&display=swap"
+    />
+  </head>
+  <body>
+    <a class="skip-link" href="#main">Skip to content</a>
+    <Navbar />
+    <main id="main" tabindex="-1">
+      <slot />
+    </main>
+    <Footer />
+    <CommandPalette />
+  </body>
+</html>

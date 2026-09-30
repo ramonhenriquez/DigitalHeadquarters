@@ -9,7 +9,8 @@
  *   data-theme="light"                = light mode
  *   Preference stored in localStorage key "theme"
  *
- * Flash prevention is handled separately in Layout.astro <head>.
+ * Flash prevention (and the OS-preference default for first visits) is
+ * handled in Layout.astro <head>. The palette's theme action clicks this button.
  * This component only wires up the click handler.
  *
  * Sun icon  — visible in dark mode  (click → switch to light)
@@ -18,7 +19,7 @@
  * CSS visibility of icons is controlled by:
  *   html[data-theme="light"] .icon-sun  { display: none }
  *   html[data-theme="light"] .icon-moon { display: block }
- * See portfolio.css section 23.
+ * See src/styles/components.css (Navigation).
  */
 ---
 
@@ -26,7 +27,7 @@
   id="theme-toggle"
   class="theme-toggle"
   aria-label="Switch to light mode"
-  title="Toggle light / dark mode"
+  title="Switch light / dark theme"
 >
   <!-- Sun — shown in dark mode -->
   <svg

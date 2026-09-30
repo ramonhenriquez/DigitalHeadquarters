@@ -1,0 +1,27 @@
+---
+import Layout from '../components/layout/Layout.astro';
+import Timeline from '../components/timeline/Timeline.astro';
+import { SITE } from '../data/site';
+---
+
+<Layout title="Timeline" description="Career, homelab and documentation milestones for Ramon Henriquez, with the source of each date noted.">
+  <header class="page-head">
+    <div class="container">
+      <h1>Timeline</h1>
+      <p>
+        Career, homelab and documentation milestones in one place. Each date says where it comes from: employment
+        history, repository history, or the Homelab-Portfolio README. Homelab-Portfolio doesn't record build dates yet,
+        so homelab work is listed separately, in build order, until it does.
+      </p>
+    </div>
+  </header>
+  <section class="band" style="padding-top:32px" aria-label="Milestones">
+    <div class="container">
+      <Timeline headingLevel="h2" />
+      <p class="small muted" style="margin-top:12px">
+        Dates still to confirm are tracked in the site's content-gaps report in{' '}
+        <a href={`${SITE.siteRepo}/blob/main/docs/CONTENT_GAPS.md`}>docs/CONTENT_GAPS.md</a>.
+      </p>
+    </div>
+  </section>
+</Layout>

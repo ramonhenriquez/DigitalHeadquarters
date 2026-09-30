@@ -1,0 +1,13 @@
+---
+/**
+ * Deployment status. Shape + text, never colour alone.
+ * Describes documented state — not whether a system is up right now.
+ */
+import { STATUS, type StatusId } from '../../data/status';
+interface Props { status: StatusId; size?: 'sm' | 'md' }
+const { status, size = 'md' } = Astro.props;
+const s = STATUS[status];
+---
+<span class={`status status--${status} status--${size}`} title={s.description}>
+  <span class="status__glyph" aria-hidden="true">{s.glyph}</span>{s.label}
+</span>

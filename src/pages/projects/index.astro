@@ -1,0 +1,51 @@
+---
+import Layout from '../../components/layout/Layout.astro';
+import ProjectRow from '../../components/projects/ProjectRow.astro';
+import { FEATURED, LAB, COVERAGE_LABEL } from '../../data/projects';
+import { STATUS, EVIDENCE } from '../../data/status';
+---
+
+<Layout title="Projects" description="Featured homelab case studies (Wazuh SIEM with Suricata, Active Directory) and documented lab systems (Proxmox, BookStack, Jellyfin, Odysseus AI), each tied to its technical documentation.">
+  <header class="page-head">
+    <div class="container">
+      <h1>Projects</h1>
+      <p>
+        Two kinds of work, kept apart on purpose. Featured case studies have enough documented implementation
+        and evidence to follow as a structured case study. Lab systems are documented and running, but their
+        write-ups don't go that deep yet.</p>
+    </div>
+  </header>
+
+  <section class="band" style="padding-top:32px" aria-labelledby="featured-h">
+    <div class="container">
+      <div class="band__head">
+        <h2 id="featured-h">Featured case studies</h2>
+        <p>Featured case studies have enough documented implementation and evidence to support a structured technical case study. Coverage indicators show where documentation is complete, partial, or still missing.</p>
+      </div>
+      <ul class="register" role="list">
+        {FEATURED.map((p) => <ProjectRow project={p} headingLevel="h3" />)}
+      </ul>
+    </div>
+  </section>
+
+  <section class="band" aria-labelledby="lab-h">
+    <div class="container">
+      <div class="band__head">
+        <h2 id="lab-h">Lab systems</h2>
+        <p>Documented parts of the lab whose write-ups cover what they are and what they're for, but not yet how they were built or tested. Their pages show exactly which parts are still to come.</p>
+      </div>
+      <ul class="register" role="list">
+        {LAB.map((p) => <ProjectRow project={p} headingLevel="h3" />)}
+      </ul>
+
+      <details class="panel" style="margin-top:32px">
+        <summary><strong>How to read the labels</strong></summary>
+        <dl class="legend">
+          {Object.entries(STATUS).map(([, s]) => (<div><dt>{s.glyph} {s.label}</dt><dd>{s.description}</dd></div>))}
+          {Object.entries(EVIDENCE).map(([, e]) => (<div><dt>{e.label}</dt><dd>{e.description}</dd></div>))}
+          <div><dt>● {COVERAGE_LABEL.documented} / ◐ {COVERAGE_LABEL.partial} / ○ {COVERAGE_LABEL.none}</dt><dd>How fully the source documents cover each section of a project page.</dd></div>
+        </dl>
+      </details>
+    </div>
+  </section>
+</Layout>

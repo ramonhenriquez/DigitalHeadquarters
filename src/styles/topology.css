@@ -1,0 +1,369 @@
+/* ================================================================
+   TOPOLOGY — the map (SVG board) and the explorer around it
+   Motion happens only in response to the visitor: edges draw in when
+   a view is opened, and connections light up on hover/selection.
+   Nothing moves on its own, because nothing here is live.
+   ================================================================ */
+
+/* ── Board ───────────────────────────────────────────────────── */
+.board {
+  width: 100%;
+  height: auto;
+  overflow: visible;
+  font-family: var(--font-body);
+}
+.board__grid { fill-opacity: 1; }
+.board__gridline { fill: none; stroke: var(--grid); stroke-width: 1; }
+
+.tgroup rect {
+  fill: color-mix(in srgb, var(--bg-raised) 40%, transparent);
+  stroke: var(--line);
+  stroke-width: 1;
+  stroke-dasharray: 4 4;
+}
+.tgroup text {
+  fill: var(--text-3);
+  font-size: 12.5px;
+  font-weight: 600;
+  font-family: var(--font-display);
+  letter-spacing: 0.02em;
+}
+
+/* Edges */
+.tedge path {
+  fill: none;
+  stroke: var(--cable);
+  stroke-width: 2;
+  stroke-opacity: 0.7;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+  transition: stroke-opacity var(--dur) var(--ease), stroke-width var(--dur) var(--ease);
+}
+.tedge--dashed path { stroke-dasharray: 7 6; }
+.tedge--planned path { stroke: var(--text-3); stroke-dasharray: 3 6; stroke-opacity: 0.8; }
+.tedge__label rect { fill: var(--bg); stroke: var(--line-soft); }
+.tedge__label text {
+  fill: var(--text-2);
+  font-size: 11px;
+  font-family: var(--font-body);
+  font-weight: 500;
+}
+
+/* Nodes */
+.tnode { cursor: pointer; outline: none; }
+.tnode__plate {
+  fill: var(--bg-raised);
+  stroke: var(--line);
+  stroke-width: 1;
+  transition: fill var(--dur) var(--ease), stroke var(--dur) var(--ease);
+}
+.tnode__cable { fill: var(--cable); }
+.tnode__label {
+  fill: var(--text-1);
+  font-family: var(--font-display);
+  font-size: 15px;
+  font-weight: 600;
+}
+.tnode__sub { fill: var(--text-2); font-size: 12px; }
+.tnode__sub.mono { font-family: var(--font-mono); font-size: 11px; }
+.tnode__glyph { font-size: 11px; }
+.tnode__glyph--deployed { fill: #4fcf92; }
+.tnode__glyph--active { fill: #6cb4ff; }
+.tnode__glyph--experimental { fill: #e8b04a; }
+.tnode__glyph--planned { fill: var(--text-3); }
+html[data-theme='light'] .tnode__glyph--deployed { fill: #0b7a4b; }
+html[data-theme='light'] .tnode__glyph--active { fill: #1c62c4; }
+html[data-theme='light'] .tnode__glyph--experimental { fill: #8a5a00; }
+.tnode.is-planned .tnode__plate { stroke-dasharray: 4 4; fill: transparent; }
+.tnode.is-planned .tnode__label { fill: var(--text-2); }
+
+.tnode:hover .tnode__plate { fill: var(--bg-hover); stroke: var(--cable); }
+.tnode:focus-visible .tnode__plate { stroke: var(--accent); stroke-width: 2.5; }
+.tnode[aria-current='true'] .tnode__plate { stroke: var(--cable); stroke-width: 2; fill: var(--bg-hover); }
+
+/* Highlight: when something is hovered/selected, dim everything else */
+.board.has-is-hover .tnode:not(.is-hover),
+.board.has-is-lit:not(.has-is-hover) .tnode:not(.is-lit) { opacity: 0.38; }
+.board.has-is-hover .tedge:not(.is-hover),
+.board.has-is-lit:not(.has-is-hover) .tedge:not(.is-lit) { opacity: 0.2; }
+.board.has-is-hover .tedge__label:not(.is-hover),
+.board.has-is-lit:not(.has-is-hover) .tedge__label:not(.is-lit) { opacity: 0.25; }
+.tnode, .tedge, .tedge__label { transition: opacity var(--dur) var(--ease); }
+.tedge.is-hover path, .tedge.is-lit path { stroke-opacity: 1; stroke-width: 2.75; }
+
+/* Static boards in case studies: the project's nodes stay bright */
+.board--focused .tnode:not(.is-focus) { opacity: 0.45; }
+.board--focused .tnode.is-focus .tnode__plate { stroke: var(--cable); stroke-width: 1.5; }
+.board--static.has-is-hover .tnode:not(.is-hover) { opacity: 0.38; }
+
+/* Draw-in when a view is opened */
+@media (prefers-reduced-motion: no-preference) {
+  .board.is-entering .tedge:not(.tedge--dashed):not(.tedge--planned) path {
+    stroke-dasharray: var(--len) var(--len);
+    stroke-dashoffset: var(--len);
+    animation: tedge-draw 700ms var(--ease) forwards;
+  }
+  .board.is-entering .tedge:nth-child(2n) path { animation-delay: 60ms; }
+  .board.is-entering .tedge:nth-child(3n) path { animation-delay: 120ms; }
+  .board.is-entering .tedge--dashed path,
+  .board.is-entering .tedge--planned path { animation: tnode-in 500ms var(--ease) 200ms both; }
+  .board.is-entering .tedge__label,
+  .board.is-entering .tnode { animation: tnode-in 380ms var(--ease) both; }
+  .board.is-entering .tedge__label { animation-delay: 360ms; }
+}
+@keyframes tedge-draw { to { stroke-dashoffset: 0; } }
+@keyframes tnode-in { from { opacity: 0; } }
+
+/* ── Explorer ────────────────────────────────────────────────── */
+.explorer {
+  border: 1px solid var(--line);
+  border-radius: var(--r-panel);
+  background: var(--bg-inset);
+  overflow: hidden;
+}
+.explorer__bar {
+  display: flex;
+  align-items: stretch;
+  justify-content: space-between;
+  gap: 12px;
+  border-bottom: 1px solid var(--line);
+  background: var(--bg-raised);
+}
+.explorer__tabs {
+  display: flex;
+  overflow-x: auto;
+  scrollbar-width: thin;
+  scroll-snap-type: x proximity;
+  scroll-padding-inline: 24px;
+  /* Fade the edges so a clipped tab reads as "scroll for more" */
+  -webkit-mask-image: linear-gradient(90deg, transparent 0, #000 16px, #000 calc(100% - 16px), transparent 100%);
+          mask-image: linear-gradient(90deg, transparent 0, #000 16px, #000 calc(100% - 16px), transparent 100%);
+  padding-inline: 8px;
+}
+@media (min-width: 1100px) {
+  .explorer__tabs { -webkit-mask-image: none; mask-image: none; padding-inline: 0; }
+}
+.explorer__tab {
+  display: inline-flex; align-items: center; gap: 8px;
+  min-height: 50px;
+  padding: 0 16px;
+  border: 0;
+  border-right: 1px solid var(--line-soft);
+  background: transparent;
+  color: var(--text-2);
+  font-weight: 500;
+  font-size: 0.9375rem;
+  white-space: nowrap;
+  cursor: pointer;
+  position: relative;
+}
+.explorer__tab { scroll-snap-align: center; }
+.explorer__tab:hover { color: var(--text-1); background: var(--bg-hover); }
+.explorer__tab[aria-selected='true'] { color: var(--text-1); background: var(--bg-inset); }
+.explorer__tab[aria-selected='true']::after {
+  content: '';
+  position: absolute; left: 0; right: 0; bottom: -1px;
+  height: 2px;
+  background: var(--cable);
+}
+.explorer__tab:focus-visible { outline-offset: -3px; }
+.explorer__tab-cable {
+  width: 10px; height: 10px;
+  border-radius: 2px;
+  background: var(--cable);
+}
+.explorer__mode {
+  display: flex; align-items: center; gap: 2px;
+  padding: 0 10px;
+  flex: none;
+}
+.explorer__mode button {
+  min-height: 32px;
+  padding: 0 12px;
+  border-radius: var(--r-plate);
+  border: 1px solid transparent;
+  background: transparent;
+  color: var(--text-2);
+  cursor: pointer;
+  font-size: 0.875rem;
+}
+.explorer__mode button[aria-pressed='true'] { background: var(--bg-inset); border-color: var(--line); color: var(--text-1); }
+
+.explorer__body {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) 340px;
+  min-height: 460px;
+}
+.explorer__views { min-width: 0; padding: 20px 22px 18px; }
+.explorer__view-title { font-size: var(--step-1); display: flex; align-items: center; gap: 10px; }
+.explorer__view-title::before { content: ''; width: 4px; height: 0.9em; border-radius: 2px; background: var(--cable); }
+.explorer__question { color: var(--text-2); font-size: 0.9375rem; margin: 2px 0 12px 14px; }
+.explorer__map { margin-inline: -6px; }
+.explorer__note {
+  margin-top: 12px;
+  font-size: 0.875rem;
+  color: var(--text-3);
+  padding-left: 14px;
+  border-left: 2px solid var(--line);
+}
+
+/* List presentation */
+.explorer__list { list-style: none; padding: 0; display: grid; gap: 6px; }
+.explorer__list > li { border: 1px solid var(--line-soft); border-radius: var(--r-plate); background: var(--bg-raised); }
+.explorer__list > li:target { border-color: var(--accent); }
+.explorer__list summary {
+  display: flex; align-items: center; flex-wrap: wrap; gap: 4px 12px;
+  padding: 12px 14px;
+  cursor: pointer;
+  list-style: none;
+  min-height: 48px;
+}
+.explorer__list summary::-webkit-details-marker { display: none; }
+.explorer__list summary::after {
+  content: '';
+  margin-left: auto;
+  width: 8px; height: 8px;
+  border-right: 2px solid var(--text-3);
+  border-bottom: 2px solid var(--text-3);
+  transform: rotate(45deg);
+  transition: transform var(--dur) var(--ease);
+}
+.explorer__list details[open] > summary::after { transform: rotate(-135deg); }
+.explorer__list-cable { width: 4px; height: 20px; border-radius: 2px; background: var(--cable); }
+.explorer__list-name { font-family: var(--font-display); font-weight: 600; font-size: 1.0625rem; }
+.explorer__list-kind { color: var(--text-3); font-size: 0.875rem; }
+.explorer__list details > :not(summary) { margin-inline: 14px; }
+.explorer__list details > .node-detail { padding: 4px 0 16px; }
+.explorer__list details > .node-detail .node-detail__head { display: none; }
+.explorer__conns {
+  list-style: none; padding: 10px 0 0;
+  border-top: 1px solid var(--line-soft);
+  display: grid; gap: 3px;
+  font-size: 0.9063rem;
+  margin-bottom: 10px;
+}
+.explorer__conns .planned { color: var(--text-3); }
+
+/* Side panel */
+.explorer__panel {
+  border-left: 1px solid var(--line);
+  background: var(--bg-raised);
+  padding: 20px 22px;
+  position: relative;
+  overflow-y: auto;
+  max-height: 720px;
+}
+.explorer__panel-lead { color: var(--text-2); font-size: 0.9375rem; }
+.explorer__panel-close {
+  margin-top: 18px;
+  min-height: 36px;
+  padding: 0 12px;
+  border-radius: var(--r-plate);
+  border: 1px solid var(--line);
+  background: transparent;
+  color: var(--text-2);
+  cursor: pointer;
+}
+.explorer__panel-close:hover { color: var(--text-1); border-color: var(--text-3); }
+.explorer__panel-close[hidden] { display: none; }
+@media (prefers-reduced-motion: no-preference) {
+  .explorer__panel.is-updated .explorer__panel-content { animation: panel-in 220ms var(--ease); }
+}
+@keyframes panel-in { from { opacity: 0; transform: translateX(8px); } }
+
+.explorer__disclaimer {
+  padding: 10px 22px;
+  border-top: 1px solid var(--line);
+  font-size: 0.8125rem;
+  color: var(--text-3);
+  background: var(--bg-raised);
+}
+
+/* View picker: replaces the tab strip on narrow screens */
+.explorer__picker { display: none; }
+.explorer__picker label { font-size: 0.8125rem; color: var(--text-3); display: block; margin-bottom: 4px; }
+.explorer__select-wrap { position: relative; display: block; }
+.explorer__select-wrap::before {
+  content: '';
+  position: absolute; left: 12px; top: 50%;
+  width: 10px; height: 10px; margin-top: -5px;
+  border-radius: 2px;
+  background: var(--cable);
+  pointer-events: none;
+}
+.explorer__select-wrap::after {
+  content: '';
+  position: absolute; right: 16px; top: 50%;
+  width: 8px; height: 8px; margin-top: -6px;
+  border-right: 2px solid var(--text-2);
+  border-bottom: 2px solid var(--text-2);
+  transform: rotate(45deg);
+  pointer-events: none;
+}
+.explorer__picker select {
+  width: 100%;
+  min-height: 46px;
+  padding: 0 34px 0 30px;
+  font-size: 1rem;
+  border: 1px solid var(--line);
+  border-radius: var(--r-plate);
+  background: var(--bg-inset);
+  color: var(--text-1);
+  font-family: inherit;
+  font-weight: 600;
+  appearance: none;
+  -webkit-appearance: none;
+  cursor: pointer;
+}
+.explorer__picker select:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; }
+
+/* Presentation modes (JS sets data-mode on the root) */
+.explorer[data-mode='map'] .explorer__list { display: none; }
+.explorer[data-mode='list'] .explorer__map { display: none; }
+.explorer[data-mode='list'] .explorer__body { grid-template-columns: 1fr; }
+.explorer[data-mode='list'] .explorer__panel { display: none; }
+
+/* No JS: every view, map above list, no panel or tab controls */
+.no-js .explorer__tabs, .no-js .explorer__mode, .no-js .explorer__panel { display: none; }
+.no-js .explorer__body { grid-template-columns: 1fr; }
+.no-js .explorer__view[hidden] { display: block; }
+.no-js .explorer__view + .explorer__view { margin-top: 32px; padding-top: 24px; border-top: 1px solid var(--line); }
+.no-js .explorer__list { margin-top: 16px; }
+
+@media (max-width: 1023px) {
+  .explorer__body { grid-template-columns: 1fr; }
+  .explorer__panel { border-left: 0; border-top: 1px solid var(--line); max-height: none; }
+}
+@media (max-width: 759px) {
+  .explorer__views { padding: 16px 14px; }
+  .explorer__bar { flex-direction: row; flex-wrap: wrap; align-items: flex-end; gap: 10px; padding: 12px 12px 12px 14px; }
+  .js .explorer__tabs { display: none; }
+  /* Wraps the Map/List toggle onto its own row before the select would clip */
+  .js .explorer__picker { display: block; flex: 1 1 100%; min-width: 0; }
+  .explorer__mode { margin-left: auto; }
+  .explorer__mode { padding: 0; flex: none; }
+  .explorer__mode button { min-height: 46px; padding: 0 12px; }
+  .explorer__map { overflow-x: auto; margin-inline: -14px; padding-inline: 14px; }
+  .explorer__map .board { min-width: 640px; }
+}
+
+/* Static board framing inside case studies */
+.board-frame {
+  border: 1px solid var(--line);
+  border-radius: var(--r-panel);
+  background: var(--bg-inset);
+  padding: 14px;
+  overflow-x: auto;
+}
+.board-frame .board { min-width: 600px; }
+.board-frame__caption { margin-top: 10px; font-size: 0.875rem; color: var(--text-3); }
+
+/* Before explorer.ts runs, match the mode it will pick (map on wide screens,
+   list on narrow) so the page doesn't shift when the script loads. */
+.js .explorer:not([data-mode]) .explorer__list { display: none; }
+@media (max-width: 759px) {
+  .js .explorer:not([data-mode]) .explorer__list { display: grid; }
+  .js .explorer:not([data-mode]) .explorer__map,
+  .js .explorer:not([data-mode]) .explorer__panel { display: none; }
+  .js .explorer:not([data-mode]) .explorer__body { grid-template-columns: 1fr; }
+}

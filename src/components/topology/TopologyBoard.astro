@@ -1,0 +1,112 @@
+---
+/**
+ * TopologyBoard.astro — one architecture view drawn as SVG at build time.
+ *
+ * mode="explorer": node links point at the list-view entry (#node-…) so
+ *                  they work without JS; explorer.ts turns them into panel toggles.
+ * mode="static":   used inside case studies; nodes link into the explorer.
+ *
+ * Deliberately no animated "traffic": that would imply live telemetry.
+ */
+import { NODE_H, nodeById, type View } from '../../data/infrastructure';
+import { STATUS, layerById } from '../../data/status';
+import { boxesFor, routeEdge } from '../../lib/geometry';
+
+interface Props {
+  view: View;
+  mode?: 'explorer' | 'static';
+  focus?: string[];
+  idPrefix: string;
+}
+
+const { view, mode = 'explorer', focus = [], idPrefix } = Astro.props;
+const BASE = import.meta.env.BASE_URL;
+const boxes = boxesFor(view);
+const layer = layerById[view.id];
+const gridId = `${idPrefix}-grid-${view.id}`;
+
+const edges = view.edges.map((e) => ({ edge: e, routed: routeEdge(e, boxes) }));
+
+const href = (id: string) =>
+  mode === 'explorer' ? `#node-${idPrefix}-${view.id}-${id}` : `${BASE}infrastructure/?view=${view.id}&node=${id}`;
+
+const labelWidth = (t: string) => Math.round(t.length * 6.2 + 14);
+---
+
+<svg
+  class:list={['board', { 'board--static': mode === 'static', 'board--focused': focus.length > 0 }]}
+  viewBox={`0 0 ${view.width} ${view.height}`}
+  role="group"
+  aria-label={`Map of the ${layer.label.toLowerCase()} view`}
+  data-board={view.id}
+  data-layer={view.id}
+>
+  <defs>
+    <pattern id={gridId} width="24" height="24" patternUnits="userSpaceOnUse">
+      <path d="M24 0H0V24" class="board__gridline" />
+    </pattern>
+  </defs>
+  <rect class="board__grid" width={view.width} height={view.height} fill={`url(#${gridId})`} />
+
+  {view.groups?.map((g) => (
+    <g class="tgroup" data-group={g.id}>
+      <rect x={g.x} y={g.y} width={g.w} height={g.h} rx="10" />
+      <text x={g.x + 14} y={g.y + 20}>{g.label}</text>
+    </g>
+  ))}
+
+  <g class="tedges">
+    {edges.map(({ edge, routed }) => (
+      <g
+        class:list={['tedge', { 'tedge--dashed': edge.dashed, 'tedge--planned': edge.planned }]}
+        data-from={edge.from}
+        data-to={edge.to}
+        style={`--len:${routed.length}`}
+      >
+        <path d={routed.d} />
+      </g>
+    ))}
+  </g>
+
+  <g class="tnodes">
+    {view.nodes.map((vn) => {
+      const n = nodeById[vn.id];
+      const b = boxes[vn.id];
+      const second = vn.sub ?? n.ident;
+      const secondIsIdent = !vn.sub && !!n.ident;
+      const status = n.status ? STATUS[n.status] : null;
+      const aria = [n.label, n.ident && n.ident !== n.label ? n.ident : null, n.kind, status?.label].filter(Boolean).join(', ');
+      return (
+        <a
+          class:list={['tnode', { 'is-focus': focus.includes(vn.id), 'is-planned': n.status === 'planned' }]}
+          href={href(vn.id)}
+          data-node={vn.id}
+          data-layer={n.layer}
+          aria-label={aria}
+        >
+          <rect class="tnode__plate" x={b.x} y={b.y} width={b.w} height={NODE_H} rx="6" />
+          <rect class="tnode__cable" x={b.x} y={b.y + 8} width="4" height={NODE_H - 16} rx="2" />
+          <text class="tnode__label" x={b.x + 16} y={b.y + (second ? 25 : 35)}>{vn.label ?? n.short ?? n.label}</text>
+          {second && (
+            <text class:list={['tnode__sub', { mono: secondIsIdent }]} x={b.x + 16} y={b.y + 44}>{second}</text>
+          )}
+          {status && (
+            <text class={`tnode__glyph tnode__glyph--${n.status}`} x={b.x + b.w - 13} y={b.y + NODE_H - 11} text-anchor="middle" aria-hidden="true">
+              {status.glyph}
+            </text>
+          )}
+        </a>
+      );
+    })}
+  </g>
+
+  <!-- Edge labels sit above the nodes so a short run can't hide them -->
+  <g class="tlabels" aria-hidden="true">
+    {edges.filter(({ routed }) => routed.label).map(({ edge, routed }) => (
+      <g class="tedge__label" data-from={edge.from} data-to={edge.to} transform={`translate(${routed.label!.x} ${routed.label!.y})`}>
+        <rect x={-labelWidth(routed.label!.text) / 2} y="-10" width={labelWidth(routed.label!.text)} height="20" rx="3" />
+        <text text-anchor="middle" dy="4">{routed.label!.text}</text>
+      </g>
+    ))}
+  </g>
+</svg>

@@ -1,0 +1,38 @@
+---
+/**
+ * Full-page explorer. ?view= and ?node= are kept in the URL so any
+ * component can be linked to directly (the command palette uses this).
+ */
+import Layout from '../../components/layout/Layout.astro';
+import TopologyExplorer from '../../components/topology/TopologyExplorer.astro';
+import { LAYERS } from '../../data/status';
+import { SITE } from '../../data/site';
+
+const BASE = import.meta.env.BASE_URL;
+---
+
+<Layout title="Infrastructure" description="Interactive map of Ramon Henriquez's homelab: physical, network, virtualization, security monitoring, identity and self-hosted services, drawn from the Homelab-Portfolio documentation.">
+  <header class="page-head">
+    <div class="container container--wide">
+      <h1>Infrastructure</h1>
+      <p>
+        The lab seen through {LAYERS.length} views. Select any component to see what the documentation says about it,
+        what isn't documented yet, and the case study it belongs to.
+      </p>
+    </div>
+  </header>
+
+  <div class="container container--wide" style="padding-block: 24px 72px">
+    <TopologyExplorer id="infra" initialView="physical" syncUrl headingLevel="h2" />
+
+    <section class="band__head" style="margin-top:40px" aria-labelledby="how-h">
+      <h2 id="how-h" style="font-size:var(--step-1)">How this map is made</h2>
+      <p>
+        The map is drawn by hand from the architecture and project documents in{' '}
+        <a href={SITE.sourceRepo}>Homelab-Portfolio</a>, and every fact in a component's panel links to the document it
+        came from. If a document doesn't state something (an IP plan, VLANs, hardware models, cabling), the map leaves it
+        out and lists it under "Not yet documented". Browse the <a href={`${BASE}docs/`}>source documents</a>.
+      </p>
+    </section>
+  </div>
+</Layout>

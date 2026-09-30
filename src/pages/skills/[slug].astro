@@ -1,0 +1,106 @@
+---
+/**
+ * Skill page: skill → evidence → project → source document.
+ * Evidence is grouped by the project it was demonstrated in; each row links
+ * to the document on this site and to the same file on GitHub (pinned to the
+ * synced commit). Nothing here is claimed without a source row.
+ */
+import Layout from '../../components/layout/Layout.astro';
+import EvidenceBadge from '../../components/ui/EvidenceBadge.astro';
+import StatusBadge from '../../components/ui/StatusBadge.astro';
+import { SKILLS, skillStrength, type Skill, type Evidence } from '../../data/skills';
+import { projectBySlug } from '../../data/projects';
+import { EVIDENCE } from '../../data/status';
+import { docHref, docTitleMap, githubUrl } from '../../lib/sources';
+
+export function getStaticPaths() {
+  return SKILLS.map((skill) => ({ params: { slug: skill.slug }, props: { skill } }));
+}
+interface Props { skill: Skill }
+const { skill: s } = Astro.props;
+const BASE = import.meta.env.BASE_URL;
+const titles = await docTitleMap();
+const byStrength = (a: Evidence, b: Evidence) => EVIDENCE[b.level].rank - EVIDENCE[a.level].rank;
+
+// Group by project; project-less evidence (architecture docs) goes last.
+const groups = new Map<string, Evidence[]>();
+[...s.evidence].sort(byStrength).forEach((e) => {
+  const k = e.project ?? '';
+  groups.set(k, [...(groups.get(k) ?? []), e]);
+});
+const ordered = [...groups.entries()].sort(([a], [b]) => (a === '' ? 1 : b === '' ? -1 : 0));
+const related = SKILLS.filter((o) => o.domain === s.domain && o.slug !== s.slug);
+const strength = skillStrength(s);
+const thin = EVIDENCE[strength].rank <= EVIDENCE.architecture.rank;
+---
+
+<Layout title={s.name} description={`${s.name}: ${s.summary}`}>
+  <header class="cs-hero" data-layer={s.layer}>
+    <div class="container">
+      <p class="cs-hero__crumb"><a href={`${BASE}skills/`}>Skills</a> <span aria-hidden="true">/</span> {s.name}</p>
+      <p class="cs-hero__layer">{s.domain}</p>
+      <h1>{s.name}</h1>
+      <p class="cs-hero__summary">{s.summary}</p>
+      <div class="cs-hero__meta">
+        <span class="small muted">Strongest evidence:</span>
+        <EvidenceBadge level={strength} />
+      </div>
+      {thin && (
+        <p class="cs-hero__note">The documentation shows this is part of the lab, but not yet how it was set up or tested. Hands-on evidence is not yet documented.</p>
+      )}
+    </div>
+  </header>
+
+  <div class="container" style="padding-block: 36px 72px" data-layer={s.layer}>
+    <section aria-labelledby="ev-h">
+      <h2 id="ev-h" style="font-size:var(--step-2);margin-bottom:6px">Where it's demonstrated</h2>
+      <p class="muted" style="margin-bottom:18px;max-width:64ch">Each piece of evidence, the project it belongs to, and the document that shows it.</p>
+
+      <ol class="chain" role="list">
+        {ordered.map(([slug, items]) => {
+          const p = slug ? projectBySlug[slug] : null;
+          return (
+            <li class="chain__group" data-layer={p?.layer ?? s.layer}>
+              <div class="chain__project">
+                {p ? (
+                  <>
+                    <span class="chain__kind">{p.tier === 'featured' ? 'Case study' : 'Lab system'}</span>
+                    <h3 class="chain__title"><a href={`${BASE}projects/${p.slug}/`}>{p.title}</a></h3>
+                    <StatusBadge status={p.status} size="sm" />
+                  </>
+                ) : (
+                  <>
+                    <span class="chain__kind">Architecture documentation</span>
+                    <h3 class="chain__title">Lab architecture</h3>
+                  </>
+                )}
+              </div>
+              <ul class="chain__evidence" role="list">
+                {items.map((e) => (
+                  <li>
+                    <EvidenceBadge level={e.level} />
+                    <p class="chain__text">{e.text}</p>
+                    <p class="chain__src">
+                      <span class="visually-hidden">Source: </span>
+                      <a href={docHref(e.source)}>{titles[e.source] ?? e.source}</a>
+                      <a href={githubUrl(e.source)} class="chain__gh">on GitHub</a>
+                    </p>
+                  </li>
+                ))}
+              </ul>
+            </li>
+          );
+        })}
+      </ol>
+    </section>
+
+    {related.length > 0 && (
+      <section aria-labelledby="rel-h" style="margin-top:40px">
+        <h2 id="rel-h" style="font-size:var(--step-1);margin-bottom:10px">Related skills</h2>
+        <ul class="chip-list" role="list">
+          {related.map((r) => <li><a class="chip" data-layer={r.layer} href={`${BASE}skills/${r.slug}/`}>{r.name}</a></li>)}
+        </ul>
+      </section>
+    )}
+  </div>
+</Layout>

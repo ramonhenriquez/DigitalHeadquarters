@@ -1,0 +1,13 @@
+---
+/** Strength of evidence behind a claim. Four-step meter + text label. */
+import { EVIDENCE, type EvidenceLevel } from '../../data/status';
+interface Props { level: EvidenceLevel }
+const { level } = Astro.props;
+const e = EVIDENCE[level];
+---
+<span class={`evidence evidence--${level}`} title={e.description}>
+  <span class="evidence__meter" aria-hidden="true">
+    {[1, 2, 3, 4].map((i) => <span class={i <= e.rank ? 'on' : ''} />)}
+  </span>
+  {e.label}
+</span>

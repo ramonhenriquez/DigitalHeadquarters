@@ -1,0 +1,30 @@
+---
+/**
+ * Documentation coverage for one project: which case-study sections the
+ * Homelab-Portfolio docs cover fully, partly, or not yet. Derived from
+ * the project data, so it can't drift from what the page shows.
+ */
+import { CASE_STUDY_SECTIONS, WRITTEN_SECTIONS, sectionCoverage, type Project } from '../../data/projects';
+import CoverageBadge from '../ui/CoverageBadge.astro';
+
+interface Props { project: Project }
+const { project: p } = Astro.props;
+const rows = CASE_STUDY_SECTIONS.filter((s) => (WRITTEN_SECTIONS as readonly string[]).includes(s.key)).map((s) => ({
+  key: s.key,
+  title: s.title,
+  coverage: sectionCoverage((p as any)[s.key]),
+}));
+const full = rows.filter((r) => r.coverage === 'documented').length;
+const partial = rows.filter((r) => r.coverage === 'partial').length;
+---
+<section class="coverage-summary" aria-labelledby={`cov-${p.slug}`}>
+  <h2 class="coverage-summary__title" id={`cov-${p.slug}`}>Documentation coverage</h2>
+  <p class="coverage-summary__lead small muted">
+    {full} of {rows.length} sections fully documented{partial > 0 && `, ${partial} partly`}. Based only on what Homelab-Portfolio contains.
+  </p>
+  <ul class="coverage-summary__list" role="list">
+    {rows.map((r) => (
+      <li><a href={`#cs-${r.key}`}><CoverageBadge coverage={r.coverage} compact />{r.title}</a></li>
+    ))}
+  </ul>
+</section>

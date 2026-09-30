@@ -1,0 +1,41 @@
+---
+/**
+ * ProjectRow.astro — one row of the project register.
+ * Evolved from the original ProjectCard: same data, but it links to the
+ * internal project page instead of sending visitors off to GitHub.
+ * Shows how much of the case study the source docs cover.
+ */
+import { WRITTEN_SECTIONS, sectionCoverage, type Project } from '../../data/projects';
+import StatusBadge from '../ui/StatusBadge.astro';
+import EvidenceBadge from '../ui/EvidenceBadge.astro';
+import { layerById } from '../../data/status';
+
+interface Props { project: Project; headingLevel?: 'h2' | 'h3' | 'h4' }
+const { project: p, headingLevel = 'h3' } = Astro.props;
+const H = headingLevel;
+const BASE = import.meta.env.BASE_URL;
+const cov = WRITTEN_SECTIONS.map((k) => sectionCoverage(p[k]));
+const full = cov.filter((c) => c === 'documented').length;
+const partial = cov.filter((c) => c === 'partial').length;
+const none = cov.length - full - partial;
+const coverageText = [`${full} full`, partial && `${partial} partial`, none && `${none} not yet`].filter(Boolean).join(', ');
+---
+<li class="register__row" data-layer={p.layer} data-filter-layer={p.layer} data-tier={p.tier}>
+  <a class="register__link" href={`${BASE}projects/${p.slug}/`}>
+    <span class="register__cable" aria-hidden="true"></span>
+    <span class="register__main">
+      <span class="register__layer">{layerById[p.layer].label}</span>
+      <H class="register__title">{p.title}</H>
+      <span class="register__proves">{p.proves}</span>
+    </span>
+    <span class="register__summary">
+      {p.summary}
+      {p.tier === 'lab' && <span class="register__note">Technical documentation currently being expanded.</span>}
+    </span>
+    <span class="register__meta">
+      <StatusBadge status={p.status} size="sm" />
+      <EvidenceBadge level={p.evidence} />
+      <span class="register__coverage">Coverage: {coverageText}<span class="visually-hidden"> (of {cov.length} sections)</span></span>
+    </span>
+  </a>
+</li>

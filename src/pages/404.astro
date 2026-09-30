@@ -1,0 +1,16 @@
+---
+import Layout from '../components/layout/Layout.astro';
+const BASE = import.meta.env.BASE_URL;
+---
+
+<Layout title="Page not found">
+  <section class="container notfound">
+    <h1>No route to that page</h1>
+    <p class="muted" style="margin-top:12px;max-width:56ch">
+      The address didn't match anything on this site. It may have moved during the redesign.
+      Try the <a href={`${BASE}infrastructure/`}>infrastructure map</a>, the <a href={`${BASE}projects/`}>case studies</a>,
+      or search with <kbd>Ctrl</kbd> <kbd>K</kbd>.
+    </p>
+    <p style="margin-top:24px"><a class="btn btn--primary" href={BASE}>Back to home</a></p>
+  </section>
+</Layout>

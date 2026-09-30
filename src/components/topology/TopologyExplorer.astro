@@ -1,0 +1,158 @@
+---
+/**
+ * TopologyExplorer.astro — "Explore the infrastructure I've built."
+ *
+ * Six architecture views as tabs. Each view has two presentations of the
+ * same data: the map (SVG) and a list (the accessible / mobile / no-JS form).
+ * Selecting a node shows its documented facts in the side panel.
+ *
+ * Without JavaScript: every view is shown one after another, map and list
+ * together, and map nodes jump to their list entries.
+ */
+import { VIEWS, nodeById, type View } from '../../data/infrastructure';
+import { LAYERS, STATUS, layerById, type LayerId } from '../../data/status';
+import TopologyBoard from './TopologyBoard.astro';
+import NodeDetail from './NodeDetail.astro';
+import StatusBadge from '../ui/StatusBadge.astro';
+
+interface Props {
+  /** Unique per page — prefixes ids so two explorers can't collide */
+  id?: string;
+  initialView?: LayerId;
+  /** Read and write ?view= & ?node= in the URL */
+  syncUrl?: boolean;
+  headingLevel?: 'h2' | 'h3';
+  label?: string;
+}
+
+const { id = 'explorer', initialView = 'security', syncUrl = false, headingLevel = 'h2', label = 'Infrastructure explorer' } = Astro.props;
+
+const connectionsFor = (view: View, nodeId: string) =>
+  view.edges
+    .filter((e) => e.from === nodeId || e.to === nodeId)
+    .map((e) => {
+      const otherId = e.from === nodeId ? e.to : e.from;
+      const other = nodeById[otherId]?.label ?? view.groups?.find((g) => g.id === otherId)?.label ?? otherId;
+      return { other, label: e.label, planned: e.planned, outgoing: e.from === nodeId };
+    });
+
+const detailHeading = headingLevel === 'h2' ? 'h3' : 'h4';
+---
+
+<section class="explorer" data-explorer data-initial-view={initialView} data-sync-url={syncUrl ? 'true' : undefined} aria-label={label}>
+  <div class="explorer__bar">
+    <div class="explorer__tabs" role="tablist" aria-label="Architecture views">
+      {LAYERS.map((l) => (
+        <button
+          type="button"
+          role="tab"
+          id={`${id}-tab-${l.id}`}
+          aria-controls={`${id}-view-${l.id}`}
+          aria-selected={l.id === initialView ? 'true' : 'false'}
+          tabindex={l.id === initialView ? 0 : -1}
+          data-tab={l.id}
+          data-layer={l.id}
+          class="explorer__tab"
+        >
+          <span class="explorer__tab-cable" aria-hidden="true"></span>{l.label}
+        </button>
+      ))}
+    </div>
+    <div class="explorer__picker">
+      <label for={`${id}-view-select`}>Architecture view</label>
+      <span class="explorer__select-wrap" data-layer={initialView}>
+        <select id={`${id}-view-select`} data-view-select>
+          {LAYERS.map((l) => <option value={l.id} selected={l.id === initialView}>{l.label}</option>)}
+        </select>
+      </span>
+    </div>
+    <div class="explorer__mode" role="group" aria-label="Presentation">
+      <button type="button" aria-pressed="true" data-mode="map">Map</button>
+      <button type="button" aria-pressed="false" data-mode="list">List</button>
+    </div>
+  </div>
+
+  <div class="explorer__body">
+    <div class="explorer__views">
+      {VIEWS.map((view) => {
+        const layer = layerById[view.id];
+        const H = headingLevel;
+        return (
+          <div
+            class="explorer__view"
+            role="tabpanel"
+            id={`${id}-view-${view.id}`}
+            aria-labelledby={`${id}-tab-${view.id}`}
+            data-view={view.id}
+            data-layer={view.id}
+            hidden={view.id !== initialView}
+          >
+            <H class="explorer__view-title">{layer.label}</H>
+            <p class="explorer__question">{layer.question}</p>
+
+            <div class="explorer__map">
+              <TopologyBoard view={view} idPrefix={id} />
+            </div>
+
+            <ul class="explorer__list" role="list">
+              {view.nodes.map((vn) => {
+                const n = nodeById[vn.id];
+                const conns = connectionsFor(view, vn.id);
+                return (
+                  <li id={`node-${id}-${view.id}-${vn.id}`} data-layer={n.layer}>
+                    <details data-list-node={vn.id}>
+                      <summary>
+                        <span class="explorer__list-cable" aria-hidden="true"></span>
+                        <span class="explorer__list-name">{n.label}</span>
+                        <span class="explorer__list-kind">{vn.sub ?? n.kind}</span>
+                        {n.status && <StatusBadge status={n.status} size="sm" />}
+                      </summary>
+                      {conns.length > 0 && (
+                        <ul class="explorer__conns" role="list" aria-label="Connections in this view">
+                          {conns.map((c) => (
+                            <li class:list={{ planned: c.planned }}>
+                              <span aria-hidden="true">{c.outgoing ? '→' : '←'}</span>
+                              <span class="visually-hidden">{c.outgoing ? 'Connects to' : 'Connected from'}</span>
+                              {' '}{c.other}{c.label && <span class="muted"> ({c.label})</span>}
+                              {c.planned && <span class="muted"> planned</span>}
+                            </li>
+                          ))}
+                        </ul>
+                      )}
+                      <NodeDetail node={n} headingLevel={detailHeading} />
+                    </details>
+                  </li>
+                );
+              })}
+            </ul>
+
+            {view.note && <p class="explorer__note">{view.note}</p>}
+          </div>
+        );
+      })}
+    </div>
+
+    <aside class="explorer__panel" aria-label="Selected component" data-panel>
+      <div class="explorer__panel-empty" data-panel-empty>
+        <p class="explorer__panel-lead">Select any component to see what it does, what the documentation says about it, and which case study it belongs to.</p>
+        <dl class="legend">
+          {Object.entries(STATUS).map(([k, s]) => (
+            <div><dt><span class={`legend__glyph legend__glyph--${k}`} aria-hidden="true">{s.glyph}</span>{s.label}</dt><dd>{s.description}</dd></div>
+          ))}
+          <div><dt><span class="legend__line" aria-hidden="true"></span>Solid line</dt><dd>Documented connection or data flow.</dd></div>
+          <div><dt><span class="legend__line legend__line--dashed" aria-hidden="true"></span>Dashed line</dt><dd>Tunnel, or a planned connection (labelled).</dd></div>
+        </dl>
+      </div>
+      <div class="explorer__panel-content" data-panel-content hidden></div>
+      <button type="button" class="explorer__panel-close" data-panel-close hidden>Close details</button>
+    </aside>
+  </div>
+
+  <p class="explorer__disclaimer">
+    Drawn from the architecture and project documentation. Status labels describe documented state. None of this is live monitoring.
+  </p>
+</section>
+
+<script>
+  import '../../scripts/explorer.ts';
+</script>

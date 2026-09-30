@@ -1,0 +1,19 @@
+---
+/**
+ * "Source:" line linking to the Homelab-Portfolio documents a block of
+ * content came from (rendered on this site under /docs/).
+ */
+import { docHref, docTitleMap } from '../../lib/sources';
+interface Props { sources: string[]; label?: string }
+const { sources, label = 'Source' } = Astro.props;
+const titles = await docTitleMap();
+const unique = [...new Set(sources)];
+---
+{unique.length > 0 && (
+  <p class="source-refs">
+    <span class="source-refs__label">{unique.length > 1 ? `${label}s` : label}:</span>
+    {unique.map((s, i) => (
+      <>{i > 0 && ', '}<a href={docHref(s)}>{titles[s] ?? s}</a></>
+    ))}
+  </p>
+)}

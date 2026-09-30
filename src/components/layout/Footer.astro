@@ -1,0 +1,41 @@
+---
+/**
+ * Footer.astro — identity, provenance, links.
+ * The provenance line is precise about what is automatic: the documentation
+ * is synced at build time (and pinned to a commit); everything else is
+ * written by hand from those documents.
+ */
+import { SITE, PUBLIC_CONTACT } from '../../data/site';
+import { shortCommit, syncInfo } from '../../lib/sources';
+
+const info = syncInfo();
+const commit = shortCommit();
+const commitUrl = info.commit ? `${SITE.sourceRepo}/commit/${info.commit}` : SITE.sourceRepo;
+const year = new Date().getFullYear();
+---
+
+<footer class="footer">
+  <div class="container footer__inner">
+    <div class="footer__id">
+      <p class="footer__name">{SITE.name}</p>
+      <p class="small muted">{SITE.title}, {SITE.location}</p>
+    </div>
+
+    <p class="footer__source small muted">
+      Technical documentation sourced from <a href={SITE.sourceRepo}>Homelab-Portfolio</a>{commit && <>, synced at commit <a href={commitUrl}><code>{commit}</code></a>{info.commitDate && <> ({info.commitDate})</>}</>}.
+      Case studies and the infrastructure map are written from those documents and cite them.
+      Nothing on this site is live monitoring data.
+      {info.dirty && <strong> Local preview: built from uncommitted changes.</strong>}
+      {info.reused && <strong> Offline build: documentation is from an earlier sync.</strong>}
+    </p>
+
+    <nav class="footer__links" aria-label="Elsewhere">
+      <a href={PUBLIC_CONTACT.github}>GitHub</a>
+      <a href={PUBLIC_CONTACT.linkedin}>LinkedIn</a>
+      <a href={`mailto:${PUBLIC_CONTACT.email}`}>Email</a>
+      <a href={SITE.siteRepo}>Site source</a>
+    </nav>
+
+    <p class="footer__copy small muted">© {year} {SITE.name}. Built with Astro, hosted on GitHub Pages.</p>
+  </div>
+</footer>

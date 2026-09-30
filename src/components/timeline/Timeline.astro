@@ -1,0 +1,109 @@
+---
+/**
+ * Timeline.astro — evolved from LearningJourney.
+ * Filter buttons (JS) narrow the list by track; without JS all items show.
+ * Each item says where its date comes from.
+ */
+import { MILESTONES, TRACKS, DATE_SOURCE_NOTE, STATUS_TEXT, isDated, type Milestone } from '../../data/timeline';
+import { projectBySlug } from '../../data/projects';
+
+interface Props {
+  items?: Milestone[];
+  filters?: boolean;
+  headingLevel?: 'h2' | 'h3';
+}
+const { items = MILESTONES, filters = true, headingLevel = 'h2' } = Astro.props;
+const H = headingLevel;
+const BASE = import.meta.env.BASE_URL;
+const byOrder = (a: Milestone, b: Milestone) => a.sort.localeCompare(b.sort);
+const dated = items.filter(isDated).sort(byOrder);
+const undated = items.filter((m) => !isDated(m)).sort(byOrder);
+const present = TRACKS.filter((t) => items.some((m) => m.track === t.id));
+const Sub = H === 'h2' ? 'h3' : 'h4';
+const TitleInUndated = H === 'h2' ? 'h4' : 'h5';
+---
+<div class="timeline-wrap" data-timeline>
+  {filters && (
+    <div class="timeline-filters" role="group" aria-label="Show on the timeline">
+      <button type="button" aria-pressed="true" data-track-filter="all">Everything</button>
+      {present.map((t) => (
+        <button type="button" aria-pressed="false" data-track-filter={t.id} data-track={t.id}>{t.label}</button>
+      ))}
+      <p class="visually-hidden" aria-live="polite" data-timeline-status></p>
+    </div>
+  )}
+
+  {dated.length > 0 && (
+    <ol class="timeline" role="list">
+      {dated.map((m) => (
+      <li class={`tl tl--${m.status}`} data-track={m.track}>
+        <div class="tl__when">
+          <span class="tl__date">{m.date}</span>
+          <span class="tl__track">{TRACKS.find((t) => t.id === m.track)?.label}</span>
+        </div>
+        <div class="tl__marker" aria-hidden="true"></div>
+        <div class="tl__body">
+          <H class="tl__title">{m.title}</H>
+          <p class="tl__desc">{m.description}</p>
+          <p class="tl__meta small">
+            <span class="tl__status">{STATUS_TEXT[m.status]}</span>
+            {DATE_SOURCE_NOTE[m.dateSource] && <span class="muted">{DATE_SOURCE_NOTE[m.dateSource]}</span>}
+            {m.project && <a href={`${BASE}projects/${m.project}/`}>{projectBySlug[m.project].tier === 'featured' ? 'Case study' : 'Lab system'}: {projectBySlug[m.project].title}</a>}
+          </p>
+        </div>
+      </li>
+      ))}
+    </ol>
+  )}
+
+  {undated.length > 0 && (
+    <section class="timeline-undated" aria-labelledby="tl-undated-h" data-undated>
+      <Sub class="timeline-undated__title" id="tl-undated-h">Homelab work without documented dates</Sub>
+      <p class="small muted">Homelab-Portfolio doesn't yet record when these were built, so they're listed in build order rather than placed on the dated line above.</p>
+      <ol class="timeline" role="list">
+        {undated.map((m) => (
+      <li class={`tl tl--${m.status}`} data-track={m.track}>
+        <div class="tl__when">
+          <span class="tl__date">{m.date}</span>
+          <span class="tl__track">{TRACKS.find((t) => t.id === m.track)?.label}</span>
+        </div>
+        <div class="tl__marker" aria-hidden="true"></div>
+        <div class="tl__body">
+          <TitleInUndated class="tl__title">{m.title}</TitleInUndated>
+          <p class="tl__desc">{m.description}</p>
+          <p class="tl__meta small">
+            <span class="tl__status">{STATUS_TEXT[m.status]}</span>
+            {DATE_SOURCE_NOTE[m.dateSource] && <span class="muted">{DATE_SOURCE_NOTE[m.dateSource]}</span>}
+            {m.project && <a href={`${BASE}projects/${m.project}/`}>{projectBySlug[m.project].tier === 'featured' ? 'Case study' : 'Lab system'}: {projectBySlug[m.project].title}</a>}
+          </p>
+        </div>
+      </li>
+        ))}
+      </ol>
+    </section>
+  )}
+</div>
+
+<script>
+  document.querySelectorAll<HTMLElement>('[data-timeline]').forEach((root) => {
+    const buttons = [...root.querySelectorAll<HTMLButtonElement>('[data-track-filter]')];
+    const items = [...root.querySelectorAll<HTMLElement>('.tl')];
+    const status = root.querySelector<HTMLElement>('[data-timeline-status]');
+    buttons.forEach((b) =>
+      b.addEventListener('click', () => {
+        const track = b.dataset.trackFilter!;
+        buttons.forEach((x) => x.setAttribute('aria-pressed', String(x === b)));
+        let shown = 0;
+        items.forEach((li) => {
+          const on = track === 'all' || li.dataset.track === track;
+          li.hidden = !on;
+          if (on) shown++;
+        });
+        root.querySelectorAll<HTMLElement>('.timeline-undated, [data-timeline] > .timeline').forEach((group) => {
+          group.hidden = ![...group.querySelectorAll<HTMLElement>('.tl')].some((li) => !li.hidden);
+        });
+        if (status) status.textContent = `Showing ${shown} of ${items.length} milestones`;
+      }),
+    );
+  });
+</script>

@@ -1,0 +1,61 @@
+---
+/**
+ * AlertRecord.astro — the documented failed-authentication test,
+ * laid out the way an analyst would record it. Every value comes from
+ * "Wazuh + Suricata Integration.md". It is a record of a past test,
+ * clearly labelled, not a live feed.
+ */
+import { SRC } from '../../data/source-paths';
+import { docHref } from '../../lib/sources';
+interface Props { headingLevel?: 'h2' | 'h3' }
+const { headingLevel = 'h3' } = Astro.props;
+const H = headingLevel;
+const BASE = import.meta.env.BASE_URL;
+---
+<article class="alert-record" data-layer="security" aria-labelledby="alert-record-h">
+  <header class="alert-record__head">
+    <p class="alert-record__kind">Recorded test, not live data</p>
+    <H id="alert-record-h">Failed authentication on the Wazuh server</H>
+  </header>
+
+  <div class="alert-record__grid">
+    <section aria-label="Scenario">
+      <h4>Scenario</h4>
+      <p>The Wazuh server was locked and wrong passwords were entered on purpose, to check that Wazuh detects failed authentication.</p>
+    </section>
+
+    <section aria-label="Alerts raised">
+      <h4>Alerts raised</h4>
+      <table class="alert-record__table">
+        <thead><tr><th scope="col">Rule</th><th scope="col">Level</th><th scope="col">Description</th></tr></thead>
+        <tbody>
+          <tr><td><code>2501</code></td><td>5</td><td><code>syslog: User authentication failure</code></td></tr>
+          <tr><td><code>5557</code></td><td class="muted">not recorded</td><td><code>unix_chkpwd: Password check failed</code></td></tr>
+        </tbody>
+      </table>
+    </section>
+
+    <section aria-label="Investigation">
+      <h4>Investigation</h4>
+      <dl class="alert-record__qa">
+        <div><dt>Was the login successful?</dt><dd>No</dd></div>
+        <div><dt>Which user was targeted?</dt><dd><code>ramon</code></dd></div>
+        <div><dt>Was the activity expected?</dt><dd>Yes</dd></div>
+      </dl>
+    </section>
+
+    <section aria-label="Outcome" class="alert-record__outcome">
+      <h4>Outcome</h4>
+      <dl class="alert-record__qa">
+        <div><dt>Classification</dt><dd>Benign test activity</dd></div>
+        <div><dt>Reason</dt><dd>An authorised user generated the failures to verify detection.</dd></div>
+        <div><dt>Disposition</dt><dd>Closed</dd></div>
+      </dl>
+    </section>
+  </div>
+
+  <footer class="alert-record__foot small">
+    <a href={docHref(SRC.suricata)}>Read the full write-up</a>
+    <a href={`${BASE}projects/wazuh-suricata/`}>Open the case study</a>
+  </footer>
+</article>

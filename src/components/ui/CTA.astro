@@ -1,0 +1,42 @@
+---
+/**
+ * CTA.astro — reusable call-to-action block (kept from the original site).
+ */
+export interface CTAAction {
+  label: string;
+  href: string;
+  variant: 'primary' | 'outline' | 'ghost';
+  external?: boolean;
+}
+
+interface Props {
+  title: string;
+  description: string;
+  actions: CTAAction[];
+  headingId?: string;
+  sectionId?: string;
+}
+
+const { title, description, actions, headingId = 'cta-heading', sectionId } = Astro.props;
+---
+
+<section class="band cta" id={sectionId} aria-labelledby={headingId}>
+  <div class="container cta__inner">
+    <div class="cta__text">
+      <h2 id={headingId}>{title}</h2>
+      <p>{description}</p>
+    </div>
+    <div class="cta__actions">
+      {actions.map((a) => (
+        <a
+          href={a.href}
+          class={`btn btn--${a.variant}`}
+          target={a.external ? '_blank' : undefined}
+          rel={a.external ? 'noopener noreferrer' : undefined}
+        >
+          {a.label}
+        </a>
+      ))}
+    </div>
+  </div>
+</section>

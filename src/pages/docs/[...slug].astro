@@ -1,0 +1,60 @@
+---
+/**
+ * One Homelab-Portfolio document, rendered from its Markdown.
+ * If the document starts with its own "# Title", that heading is the
+ * page's h1; otherwise the page supplies one from the file name.
+ */
+import { render } from 'astro:content';
+import Layout from '../../components/layout/Layout.astro';
+import StatusBadge from '../../components/ui/StatusBadge.astro';
+import { getDocs, leadingH1, type DocInfo } from '../../lib/sources';
+import { projectBySlug } from '../../data/projects';
+
+export async function getStaticPaths() {
+  const docs = await getDocs();
+  return docs.map((doc) => ({ params: { slug: doc.id }, props: { doc } }));
+}
+
+interface Props { doc: DocInfo }
+const { doc } = Astro.props;
+const BASE = import.meta.env.BASE_URL;
+const { Content } = await render(doc.entry);
+const hasOwnH1 = leadingH1(doc.entry.body) !== null;
+const project = doc.project ? projectBySlug[doc.project] : null;
+const siblings = (await getDocs()).filter((d) => d.project && d.project === doc.project && d.id !== doc.id);
+---
+
+<Layout title={doc.title} description={doc.entry.data.summary ?? `${doc.title}: technical documentation from Homelab-Portfolio.`}>
+  <div class="container doc-layout">
+    <article class="prose-doc" aria-label={doc.title}>
+      <p class="cs-hero__crumb"><a href={`${BASE}docs/`}>Documentation</a> <span aria-hidden="true">/</span> {doc.group}</p>
+      {!hasOwnH1 && <h1>{doc.title}</h1>}
+      <Content />
+    </article>
+
+    <aside class="doc-aside" aria-label="About this document">
+      <div class="panel">
+        <dl class="meta-list">
+          <div><dt>Source file</dt><dd><code>{doc.sourcePath}</code></dd></div>
+          <div><dt>Last changed</dt><dd>{doc.updated ?? 'unknown'}</dd></div>
+          {doc.entry.data.status && <div><dt>Status</dt><dd><StatusBadge status={doc.entry.data.status} size="sm" /></dd></div>}
+        </dl>
+        <p style="margin-top:14px"><a class="btn btn--small btn--outline" href={doc.github}>View on GitHub</a></p>
+      </div>
+      {project && (
+        <div class="panel" data-layer={project.layer}>
+          <p class="small muted">Case study</p>
+          <p><a href={`${BASE}projects/${project.slug}/`}><strong>{project.title}</strong></a></p>
+          {siblings.length > 0 && (
+            <>
+              <p class="small muted" style="margin-top:12px">Related documents</p>
+              <ul class="node-detail__links" role="list">
+                {siblings.map((s) => <li><a href={s.href}>{s.title}</a></li>)}
+              </ul>
+            </>
+          )}
+        </div>
+      )}
+    </aside>
+  </div>
+</Layout>

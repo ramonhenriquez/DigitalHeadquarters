@@ -1,0 +1,46 @@
+---
+/**
+ * CommandPalette.astro
+ * Opens with Ctrl/⌘ K, "/", or the Search button. Native <dialog> handles
+ * focus trapping and Escape; the input + listbox follow the ARIA combobox
+ * pattern. The index is built at build time — no network requests.
+ */
+import { buildPaletteIndex } from '../../lib/search-index';
+import { PUBLIC_CONTACT } from '../../data/site';
+
+const index = await buildPaletteIndex();
+---
+
+<dialog class="palette" aria-label="Search the site" data-palette data-email={PUBLIC_CONTACT.email}>
+  <div class="palette__box">
+    <div class="palette__field">
+      <svg viewBox="0 0 24 24" width="18" height="18" aria-hidden="true" focusable="false"><circle cx="11" cy="11" r="7" fill="none" stroke="currentColor" stroke-width="2"/><path d="m20 20-3.5-3.5" stroke="currentColor" stroke-width="2" stroke-linecap="round"/></svg>
+      <input
+        type="text"
+        class="palette__input"
+        placeholder="Jump to a system, project, skill or document"
+        role="combobox"
+        aria-expanded="true"
+        aria-controls="palette-list"
+        aria-autocomplete="list"
+        aria-label="Search"
+        autocomplete="off"
+        spellcheck="false"
+        data-palette-input
+      />
+      <kbd class="palette__esc">Esc</kbd>
+    </div>
+    <ul class="palette__list" id="palette-list" role="listbox" aria-label="Results" data-palette-list></ul>
+    <p class="palette__empty" data-palette-empty hidden>Nothing matches that. Try a hostname like DC01, a tool like Suricata, or a page name.</p>
+    <p class="palette__foot small muted">
+      <span><kbd>↑</kbd> <kbd>↓</kbd> to move</span>
+      <span><kbd>Enter</kbd> to open</span>
+      <span class="visually-hidden" aria-live="polite" data-palette-status></span>
+    </p>
+  </div>
+</dialog>
+
+<script type="application/json" id="palette-index" set:html={JSON.stringify(index).replace(/</g, '\\u003c')} />
+<script>
+  import '../../scripts/command-palette.ts';
+</script>

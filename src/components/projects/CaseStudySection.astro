@@ -1,0 +1,65 @@
+---
+/**
+ * CaseStudySection.astro — one numbered step of a case study.
+ * Renders sourced items, the "not yet documented" note, and a source line.
+ */
+import { Code } from 'astro:components';
+import { sectionCoverage, type Section } from '../../data/projects';
+import CoverageBadge from '../ui/CoverageBadge.astro';
+import SourceRefs from '../ui/SourceRefs.astro';
+import NotDocumented from '../ui/NotDocumented.astro';
+
+interface Props {
+  id: string;
+  number: number;
+  title: string;
+  section?: Section;
+  /** Render items as an ordered list of steps */
+  steps?: boolean;
+  /** Show the coverage label next to the title (default true) */
+  showCoverage?: boolean;
+}
+
+const { id, number, title, section, steps = false, showCoverage = true } = Astro.props;
+const coverage = sectionCoverage(section);
+const items = section?.items ?? [];
+const sources = items.map((i) => i.source);
+---
+<section class:list={['cs-section', `cs-section--${coverage}`]} id={id} aria-labelledby={`${id}-h`}>
+  <div class="cs-section__head">
+    <h2 class="cs-section__title" id={`${id}-h`}>
+      <span class="cs-section__num" aria-hidden="true">{String(number).padStart(2, '0')}</span>
+      {title}
+    </h2>
+    {showCoverage && <CoverageBadge coverage={coverage} />}
+  </div>
+
+  <div class="cs-section__body">
+    {steps && items.length > 0 ? (
+      <ol class="cs-steps">
+        {items.map((it) => (
+          <li class="cs-step">
+            {it.title && <h3 class="cs-step__title">{it.title}</h3>}
+            <p>{it.text}</p>
+            {it.code && <Code code={it.code.code} lang={it.code.lang as any} theme="github-dark-dimmed" wrap class="cs-code" />}
+          </li>
+        ))}
+      </ol>
+    ) : items.length > 0 ? (
+      <ul class="cs-items" role="list">
+        {items.map((it) => (
+          <li>
+            {it.title && <strong>{it.title}. </strong>}
+            {it.text}
+            {it.code && <Code code={it.code.code} lang={it.code.lang as any} theme="github-dark-dimmed" wrap class="cs-code" />}
+          </li>
+        ))}
+      </ul>
+    ) : null}
+
+    <slot />
+
+    {section?.missing && <NotDocumented text={section.missing} />}
+    {sources.length > 0 && <SourceRefs sources={sources} />}
+  </div>
+</section>

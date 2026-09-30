@@ -1,0 +1,81 @@
+---
+/**
+ * NodeDetail.astro — everything the documentation says about one node.
+ * Rendered inside the list view; explorer.ts clones it into the side panel.
+ */
+import { type InfraNode, viewsForNode } from '../../data/infrastructure';
+import { projectBySlug } from '../../data/projects';
+import { layerById } from '../../data/status';
+import { docHref, docTitleMap } from '../../lib/sources';
+import StatusBadge from '../ui/StatusBadge.astro';
+
+interface Props {
+  node: InfraNode;
+  headingLevel?: 'h3' | 'h4';
+}
+
+const { node, headingLevel = 'h3' } = Astro.props;
+const BASE = import.meta.env.BASE_URL;
+const titles = await docTitleMap();
+const views = viewsForNode(node.id);
+const Heading = headingLevel;
+const Sub = headingLevel === 'h3' ? 'h4' : 'h5';
+---
+
+<article class="node-detail" data-layer={node.layer} data-detail={node.id}>
+  <header class="node-detail__head">
+    <p class="node-detail__kind">{node.kind}</p>
+    <Heading class="node-detail__title" tabindex="-1" data-detail-heading>{node.label}</Heading>
+    <div class="node-detail__meta">
+      {node.ident && <code>{node.ident}</code>}
+      {node.status && <StatusBadge status={node.status} size="sm" />}
+    </div>
+  </header>
+
+  <p class="node-detail__summary">{node.summary}</p>
+
+  <Sub class="node-detail__sub">Documented facts</Sub>
+  <ul class="node-detail__facts" role="list">
+    {node.facts.map((f) => (
+      <li>
+        {f.text}
+        <a class="node-detail__src" href={docHref(f.source)}>{titles[f.source] ?? f.source}</a>
+      </li>
+    ))}
+  </ul>
+
+  {node.undocumented && node.undocumented.length > 0 && (
+    <>
+      <Sub class="node-detail__sub">Not yet documented</Sub>
+      <ul class="node-detail__gaps" role="list">
+        {node.undocumented.map((g) => <li>{g}</li>)}
+      </ul>
+    </>
+  )}
+
+  {node.projects && node.projects.length > 0 && (
+    <>
+      <Sub class="node-detail__sub">Case study</Sub>
+      <ul class="node-detail__links" role="list">
+        {node.projects.map((p) => (
+          <li><a href={`${BASE}projects/${p}/`}>{projectBySlug[p].title}</a></li>
+        ))}
+      </ul>
+    </>
+  )}
+
+  {views.length > 1 && (
+    <>
+      <Sub class="node-detail__sub">Also appears in</Sub>
+      <ul class="node-detail__views" role="list">
+        {views.map((v) => (
+          <li>
+            <a href={`${BASE}infrastructure/?view=${v}&node=${node.id}`} data-goto-view={v} data-goto-node={node.id}>
+              {layerById[v].label}
+            </a>
+          </li>
+        ))}
+      </ul>
+    </>
+  )}
+</article>

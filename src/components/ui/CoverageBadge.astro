@@ -1,0 +1,11 @@
+---
+/** How completely the source docs cover a case-study section. Shape + text, never colour alone. */
+import { COVERAGE_LABEL, type Coverage } from '../../data/projects';
+interface Props { coverage: Coverage; compact?: boolean }
+const { coverage, compact = false } = Astro.props;
+const glyph = { documented: '●', partial: '◐', none: '○' }[coverage];
+---
+<span class:list={['coverage', `coverage--${coverage}`, { 'coverage--compact': compact }]}>
+  <span class="coverage__glyph" aria-hidden="true">{glyph}</span>
+  {compact ? <span class="visually-hidden">{COVERAGE_LABEL[coverage]}</span> : COVERAGE_LABEL[coverage]}
+</span>
